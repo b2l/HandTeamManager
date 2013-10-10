@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SPA Demo</title>
+    <link rel="stylesheet" href="./app.css" />
+    <meta charset="UTF-8">
+</head>
+<body>
+
+    <div id="app-wrapper"></div>
+
+</body>
+
+<!-- START TEMPLATES -->
+
+<script type="text/x-template" id="app-template">
+    <h1>Hand Team Manager</h1>
+
+    <nav>
+        <li class="joueurs">Joueurs</li>
+        <li class="compo">Composition d'équipe</li>
+        <li class="strategie">Strategie</li>
+    </nav>
+
+    <div id="content">
+    </div>
+</script>
+
+<script type="text/x-template" id="joueurs-template">
+    <ul class="joueur-list">
+        <li class="add-joueur">Ajouter un joueur</li>
+
+        <% _.each(joueurs.models, function(joueur) { %>
+            <li class="joueur" data-attr-id="<%= joueur.id %>">
+                <%= joueur.firstname %>
+                <%= joueur.lastname %>
+            </li>
+        <% }); %>
+    </ul>
+    <div class="joueur-info"></div>
+</script>
+
+<script type="text/x-tempalte" id="joueur-info-template">
+    <h3>Joueur</h3>
+    <div class="editable" data-property-name="firstname">
+        <%= joueur.firstname ? joueur.firstname : "Prénom" %>
+    </div>
+    <div class="editable" data-property-name="lastname">
+        <%= joueur.lastname ? joueur.lastname : "Nom" %>
+    </div>
+
+    <div class="roles">
+        <h3>Postes</h3>
+        <ul>
+            <% _.each(joueur.postes, function(poste) { %>
+                 <li class="role"><%= poste %></li>
+            <% }); %>
+        </ul>
+    </div>
+</script>
+
+
+<script type="text/x-template" id="compo-template">
+    <canvas id="canvas-compo" resize></canvas>
+</script>
+<!-- END TEMPLATES -->
+
+<script type="text/javascript" src="../src/lib/gator-1.2.2.js"></script>
+<script type="text/javascript" src="./app.js"></script>
+</html>

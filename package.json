@@ -1,0 +1,32 @@
+{
+    "name": "spatester",
+    "version": "1.0.0",
+    "description": "Single Page App tester",
+    "main": "src/testem-adapter.js",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com:viareport/spatester.git"
+    },
+    "keywords": [
+        "test",
+        "framework",
+        "javascript",
+        "singlepageapp"
+    ],
+    "dependencies": {
+        "microee": "~0.0.2"
+    },
+    "devDependencies": {
+        "grunt": "~0.4.1",
+        "grunt-contrib-watch": "~0.5.3",
+        "grunt-browserify": "1.0.2"
+    },
+    "engines": {
+        "node": ">=0.4.0"
+    },
+    "author": {
+        "name": "Nicolas Medda",
+        "email": "nmedda@viareport.com"
+    },
+    "license": "BSD"
+}
