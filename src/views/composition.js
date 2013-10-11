@@ -16,17 +16,14 @@ function CompositionView(models, selector) {
 }
 
 CompositionView.prototype.toggleSelect = function(e) {
+
     e.target.classList.toggle('selected');
 };
 
 CompositionView.prototype._render = function() {
-    var tpl = document.getElementById('joueurs-template').innerHTML;
+    var tpl = document.getElementById('compo-template').innerHTML;
     var html = _.template(tpl)({joueurs: this.models});
     document.querySelector(this.$el).innerHTML = html;
-
-    var tpl = document.getElementById('compo-template').innerHTML;
-    var html = _.template(tpl)();
-    document.querySelector(this.$el + " .joueur-info").innerHTML = html;
 
     var canvas = document.getElementById('canvas-compo');
 

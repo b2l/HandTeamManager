@@ -31,10 +31,10 @@
         <li class="add-joueur">Ajouter un joueur</li>
 
         <% _.each(joueurs.models, function(joueur) { %>
-            <li class="joueur" data-attr-id="<%= joueur.id %>">
-                <%= joueur.firstname %>
-                <%= joueur.lastname %>
-            </li>
+        <li class="joueur" data-attr-id="<%= joueur.id %>">
+            <%= joueur.firstname %>
+            <%= joueur.lastname %>
+        </li>
         <% }); %>
     </ul>
     <div class="joueur-info"></div>
@@ -61,6 +61,19 @@
 
 
 <script type="text/x-template" id="compo-template">
+    <ul class="joueur-list">
+        <li class="add-joueur">Ajouter un joueur</li>
+
+        <% _.each(joueurs.models, function(joueur) { %>
+        <li class="joueur" data-attr-id="<%= joueur.id %>">
+            <%= joueur.firstname %>
+            <%= joueur.lastname %>
+        </li>
+        <% }); %>
+    </ul>
+
+    <div class="selection-list"></div>
+
     <canvas id="canvas-compo" resize></canvas>
 </script>
 <!-- END TEMPLATES -->
