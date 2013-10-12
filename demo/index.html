@@ -73,7 +73,44 @@
     </ul>
 
     <div class="selection-list"></div>
+</script>
 
+<script type="text/x-template" id="selection-template">
+    <table>
+        <tr>
+            <% _.each(postes, function(poste) { %>
+                <td><%= poste.label %></td>
+            <% }) %>
+        </tr>
+        <tr class="poste">
+        <% _.each(postes, function(poste) { %>
+
+            <td class='poste-joueurs'>
+                <ul>
+                <% _.each(poste.joueurs, function(joueur) { %>
+                    <li>
+                        <%= joueur.firstname %>
+                        <%= joueur.lastname %>
+                    </li>
+                <% }) %>
+                </ul>
+            </td>
+        <% }) %>
+        </tr>
+        <tr>
+            <% _.each(postes, function(poste) { %>
+             <td class="nb-joueur"><%= poste.joueurs.length %> joueurs </td>
+            <% }) %>
+        </tr>
+    </table>
+    <div class="total-nb-joueur">
+        <%= nbJoueur %> joueurs
+    </div>
+</script>
+
+<script type="text/x-template" id="strat-template">
+    <button class='record'>Record</button>
+    <button class='play'>Play</button>
     <canvas id="canvas-compo" resize></canvas>
 </script>
 <!-- END TEMPLATES -->

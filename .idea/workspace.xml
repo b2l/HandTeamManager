@@ -4,15 +4,15 @@
     <list default="true" id="f7550d41-4776-47b4-80b1-94714d2ee439" name="Default" comment="" />
     <ignored path="spa.js.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381408495282" ignored="false" />
-    <file path="/View.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381391184132" ignored="false" />
-    <file path="/index.html" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381421766446" ignored="false" />
-    <file path="/dummy.xml" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381421766446" ignored="false" />
-    <file path="/app.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381394616079" ignored="false" />
+    <file path="/Dummy.txt" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381497882445" ignored="false" />
+    <file path="/View.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381498449158" ignored="false" />
+    <file path="/index.html" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381503093536" ignored="false" />
+    <file path="/dummy.xml" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381493924917" ignored="false" />
+    <file path="/app.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381498563751" ignored="false" />
     <file path="/Model.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381390424253" ignored="false" />
     <file path="/microee.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381155923424" ignored="false" />
     <file path="/fixtures.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381159446577" ignored="false" />
-    <file path="/app.css" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381421547209" ignored="false" />
+    <file path="/app.css" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381497148591" ignored="false" />
     <file path="/Gruntfile.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381318866314" ignored="false" />
     <file path="/joueur.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381391247467" ignored="false" />
     <file path="/a.dummy" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381319214671" ignored="false" />
@@ -21,7 +21,7 @@
     <file path="/fragment.js2" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381333262591" ignored="false" />
     <file path="/Composition.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381395797579" ignored="false" />
     <file path="/paper-full.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381395168754" ignored="false" />
-    <file path="/composition.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381421505859" ignored="false" />
+    <file path="/composition.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381498782824" ignored="false" />
     <file path="$PROJECT_DIR$/../env/link/assets/javascripts/app/views/ImportModalView.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381410070826" ignored="false" />
     <file path="/ImportModalView.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381410068287" ignored="false" />
     <file path="$PROJECT_DIR$/../env/link/assets/javascripts/templates/mapping.hbs" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381410141029" ignored="false" />
@@ -29,6 +29,10 @@
     <file path="$PROJECT_DIR$/../env/link/assets/javascripts/app/views/MappingView.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381410443659" ignored="false" />
     <file path="/MappingView.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381410443971" ignored="false" />
     <file path="$PROJECT_DIR$/../env/link/public/javascripts/link/app.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381410504443" ignored="false" />
+    <file path="$PROJECT_DIR$/demo/app.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381595106203" ignored="false" />
+    <file path="/paperjs-tool.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381595086849" ignored="false" />
+    <file path="$PROJECT_DIR$/../spatester/src/asserter.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381497959822" ignored="false" />
+    <file path="/strategie.js" changelist="f7550d41-4776-47b4-80b1-94714d2ee439" time="1381594148096" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,28 +52,37 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Gruntfile.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Gruntfile.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="4" column="0" selection-start="128" selection-end="128" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="index.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/demo/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="74" column="32" selection-start="1881" selection-end="1881" vertical-scroll-proportion="-22.125">
+            <state line="112" column="23" selection-start="2945" selection-end="2945" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="composition.js" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="composition.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/views/composition.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="25" column="35" selection-start="732" selection-end="732" vertical-scroll-proportion="0.43441227">
+            <state line="6" column="0" selection-start="230" selection-end="230" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="strategie.js" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/views/strategie.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="30" column="101" selection-start="864" selection-end="864" vertical-scroll-proportion="0.37190083">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="paperjs-tool.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/lib/paperjs-tool.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="17" column="20" selection-start="708" selection-end="708" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -78,7 +91,16 @@
       <file leaf-file-name="app.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/app.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="18" column="64" selection-start="886" selection-end="886" vertical-scroll-proportion="0.0">
+            <state line="39" column="51" selection-start="1502" selection-end="1502" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="View.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/View.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="62" column="19" selection-start="1758" selection-end="1758" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -87,7 +109,7 @@
       <file leaf-file-name="app.css" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/demo/app.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="34" column="129" selection-start="605" selection-end="605" vertical-scroll-proportion="0.0">
+            <state line="75" column="6" selection-start="1098" selection-end="1098" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -106,15 +128,6 @@
         <entry file="file://$PROJECT_DIR$/src/views/app.js">
           <provider selected="true" editor-type-id="text-editor">
             <state line="9" column="0" selection-start="236" selection-end="236" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="joueur.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/models/joueur.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="10" column="24" selection-start="238" selection-end="238" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -139,29 +152,29 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/src/lib/microee.js" />
-        <option value="$PROJECT_DIR$/src/models/joueur.js" />
         <option value="$PROJECT_DIR$/Gruntfile.js" />
         <option value="$PROJECT_DIR$/src/models/Joueurs.js" />
         <option value="$PROJECT_DIR$/src/views/app.js" />
         <option value="$PROJECT_DIR$/src/Model.js" />
-        <option value="$PROJECT_DIR$/src/View.js" />
         <option value="$PROJECT_DIR$/src/views/joueur.js" />
         <option value="$PROJECT_DIR$/src/views/Composition.js" />
         <option value="$PROJECT_DIR$/src/models/joueurs.js" />
-        <option value="$PROJECT_DIR$/src/app.js" />
         <option value="$USER_HOME$/Téléchargements/paperjs/dist/paper-full.js" />
         <option value="$PROJECT_DIR$/src/lib/paper-full.min.js" />
         <option value="$PROJECT_DIR$/demo/app.css" />
-        <option value="$PROJECT_DIR$/demo/index.html" />
+        <option value="$PROJECT_DIR$/src/View.js" />
+        <option value="$PROJECT_DIR$/src/app.js" />
         <option value="$PROJECT_DIR$/src/views/composition.js" />
+        <option value="$PROJECT_DIR$/demo/index.html" />
+        <option value="$PROJECT_DIR$/src/views/strategie.js" />
+        <option value="$PROJECT_DIR$/src/lib/paperjs-tool.js" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
     <option name="x" value="-1" />
     <option name="width" value="1922" />
-    <option name="height" value="1081" />
+    <option name="height" value="1084" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -189,7 +202,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -204,7 +216,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="spa.js" />
+              <option name="myItemId" value="HandTeamManager" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -214,7 +226,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="spa.js" />
+              <option name="myItemId" value="HandTeamManager" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -228,7 +240,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="spa.js" />
+              <option name="myItemId" value="HandTeamManager" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -246,7 +258,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="spa.js" />
+              <option name="myItemId" value="HandTeamManager" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -258,22 +270,9 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="spa.js" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="spa.js" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="demo" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -282,8 +281,8 @@
     <property name="options.lastSelected" value="preferences.externalTools" />
     <property name="last_opened_file_path" value="$USER_HOME$/Téléchargements/paperjs/dist/paper-full.js" />
     <property name="DefaultHtmlFileTemplate" value="Html5" />
-    <property name="options.searchVisible" value="true" />
     <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="options.searchVisible" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -314,17 +313,17 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1" y="0" width="1922" height="1081" extended-state="6" />
+    <frame x="-1" y="0" width="1922" height="1084" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24986821" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24986821" sideWeight="0.6709539" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24986821" sideWeight="0.67199147" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3290461" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32800853" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -361,7 +360,7 @@
     <option name="SHOW_ONLY_CHANGED_IN_SELECTION_DIFF" value="true" />
     <option name="CHECK_COMMIT_MESSAGE_SPELLING" value="true" />
     <option name="DEFAULT_PATCH_EXTENSION" value="patch" />
-    <option name="SHORT_DIFF_HORIZONTALLY" value="true" />
+    <option name="SHORT_DIFF_HORISONTALLY" value="true" />
     <option name="SHORT_DIFF_EXTRA_LINES" value="2" />
     <option name="SOFT_WRAPS_IN_SHORT_DIFF" value="true" />
     <option name="INCLUDE_TEXT_INTO_PATCH" value="false" />
@@ -396,11 +395,6 @@
     <breakpoint-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/lib/JavascriptLanguage.jar!/com/intellij/lang/javascript/index/predefined/DOMCore.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="457" column="2" selection-start="7927" selection-end="7927" vertical-scroll-proportion="0.33296582" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/lib/underscore-1.5.2.js">
       <provider selected="true" editor-type-id="text-editor">
         <state line="5" column="39" selection-start="14358" selection-end="14358" vertical-scroll-proportion="0.08389262" />
@@ -418,18 +412,21 @@
         <state line="14" column="50" selection-start="393" selection-end="393" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/View.js">
+    <entry file="file://$PROJECT_DIR$/src/models/joueur.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="26" column="22" selection-start="879" selection-end="879" vertical-scroll-proportion="0.0">
+        <state line="10" column="24" selection-start="238" selection-end="238" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lib/paper-full.min.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="21" column="62" selection-start="551" selection-end="551" vertical-scroll-proportion="0.53662694">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Gruntfile.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="4" column="0" selection-start="128" selection-end="128" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="4" column="0" selection-start="128" selection-end="128" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/models/joueurs.js">
@@ -439,21 +436,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/models/joueur.js">
+    <entry file="file://$PROJECT_DIR$/demo/app.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="10" column="24" selection-start="238" selection-end="238" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Téléchargements/paperjs/dist/paper-full.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="11202" column="4" selection-start="280475" selection-end="280488" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/lib/paper-full.min.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="21" column="62" selection-start="551" selection-end="551" vertical-scroll-proportion="0.53662694">
+        <state line="75" column="6" selection-start="1098" selection-end="1098" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -472,30 +457,44 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/app.js">
+    <entry file="file://$PROJECT_DIR$/src/View.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="18" column="64" selection-start="886" selection-end="886" vertical-scroll-proportion="0.0">
+        <state line="62" column="19" selection-start="1758" selection-end="1758" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/demo/app.css">
+    <entry file="file://$PROJECT_DIR$/src/app.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="34" column="129" selection-start="605" selection-end="605" vertical-scroll-proportion="0.0">
+        <state line="39" column="51" selection-start="1502" selection-end="1502" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/demo/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="74" column="32" selection-start="1881" selection-end="1881" vertical-scroll-proportion="-22.125">
+        <state line="112" column="23" selection-start="2945" selection-end="2945" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/views/composition.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="25" column="35" selection-start="732" selection-end="732" vertical-scroll-proportion="0.43441227">
+        <state line="6" column="0" selection-start="230" selection-end="230" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lib/paperjs-tool.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="17" column="20" selection-start="708" selection-end="708" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/views/strategie.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="30" column="101" selection-start="864" selection-end="864" vertical-scroll-proportion="0.37190083">
           <folding />
         </state>
       </provider>

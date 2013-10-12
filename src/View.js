@@ -59,6 +59,10 @@ View.prototype.getView = function(label) {
     return matches ? matches[0].view : null;
 };
 
+View.prototype.destroy = function() {
+    this._unbind();
+}
+
 Microee.mixin(View);
 
 module.exports = View;

@@ -17,7 +17,7 @@
     background: #e5e5e5;
 }
 
-.joueur-info {
+.selection-list, .joueur-info {
     margin-left: 250px;
     padding: 10px;
 }
@@ -46,10 +46,45 @@ nav li.active {
     border: 1px solid #ececec;
 }
 
+.joueur:hover {
+    cursor: pointer;
+}
+
 .joueur.selected {
     background: #ccc;
 }
 
 .joueur.selected:hover {
     background: #ccc;
+}
+
+canvas {
+    float: left;
+    margin-left: 300px;
+}
+
+.selection-list {
+    display: table;
+}
+
+table {
+    border-collapse: collapse;
+    empty-cells: show;
+}
+
+table td {
+    vertical-align: top;
+    border: 1px solid #e5e5e5;
+}
+
+.poste ul {
+    font-size: .8em;
+    min-width: 200px;
+    padding: 0;
+    list-style-type: none;
+    margin: 0 0 10px;
+}
+
+.nb-joueur {
+    font-size: .8em;
 }

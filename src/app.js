@@ -2,6 +2,7 @@ var AppView= require('./views/app');
 var Joueurs = require('./models/joueurs');
 var JoueurView = require('./views/joueur');
 var CompositionView = require('./views/composition');
+var StrategieView = require('./views/strategie');
 
 function startEdit(e) {
     var value = e.target.innerHTML;
@@ -32,34 +33,53 @@ Gator(document).on('click', '.editable', startEdit);
 Gator(document).on('keydown', '.editable .editing', editKeyListener);
 
 var App = {
+    currentView: null,
+    _goto: function(routes) {
+        if (App[routes]) {
+            if (this.currentView) {
+                this.currentView.destroy.call(this.currentView);
+            }
+
+            App[routes].call(this);
+        }
+    },
     init: function() {
         var appView = new AppView('#app-wrapper');
         appView.events = {
             'click': {
-                'li.joueurs': App.joueurs,
-                'li.compo': App.compo,
-                'li.strategie': App.strat
+                'li.joueurs': function () {
+                    this._goto('joueurs');
+                }.bind(this),
+                'li.compo': function () {
+                    this._goto('compo');
+                }.bind(this),
+                'li.strategie': function () {
+                    this._goto('strat');
+                }.bind(this)
             }
         };
         appView.render();
 
-        // Go to
-        App.joueurs();
+        this._goto('joueurs');
     },
-    joueurs: function() {
+    joueurs: function () {
         var joueurs = new Joueurs();
         joueurs.load();
         var joueurView = new JoueurView(joueurs, '#content');
         joueurView.render();
+        this.currentView = joueurView;
     },
     compo: function() {
         var joueurs = new Joueurs();
         joueurs.load();
         var compoView = new CompositionView(joueurs, '#content');
         compoView.render();
+        this.currentView = compoView;
     },
     strat: function() {
-
+        var stratView = new StrategieView('#content');
+        stratView.render();
+        this.currentView = stratView;
     }
 };
 
