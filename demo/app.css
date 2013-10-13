@@ -1,0 +1,90 @@
+
+.joueur-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 250px;
+    border-left: 1px solid #e5e5e5;
+    border-right: 1px solid #e5e5e5;
+    float: left;
+}
+
+.joueur-list .joueur {
+    line-height: 1.2em;
+    border-bottom: 1px solid #e5e5e5;
+}
+.joueur-list .joueur:hover {
+    background: #e5e5e5;
+}
+
+.selection-list, .joueur-info {
+    margin-left: 250px;
+    padding: 10px;
+}
+
+nav {
+    border-bottom: 1px solid #e5e5e5;
+}
+nav li {
+    margin: 0 -5px 0 0;
+
+    display: inline-block;
+    padding: 0 20px;
+    border: 1px solid #e5e5e5;
+    border-bottom: none;
+    border-radius: 5px 5px 0 0;
+}
+
+nav li.active {
+    background: #e5e5e5;
+}
+
+.editable:after {
+    content: "edit";
+    background: #e5e5e5;
+    font-size: 60%;
+    border: 1px solid #ececec;
+}
+
+.joueur:hover {
+    cursor: pointer;
+}
+
+.joueur.selected {
+    background: #ccc;
+}
+
+.joueur.selected:hover {
+    background: #ccc;
+}
+
+canvas {
+    float: left;
+    margin-left: 300px;
+}
+
+.selection-list {
+    display: table;
+}
+
+table {
+    border-collapse: collapse;
+    empty-cells: show;
+}
+
+table td {
+    vertical-align: top;
+    border: 1px solid #e5e5e5;
+}
+
+.poste ul {
+    font-size: .8em;
+    min-width: 200px;
+    padding: 0;
+    list-style-type: none;
+    margin: 0 0 10px;
+}
+
+.nb-joueur {
+    font-size: .8em;
+}
