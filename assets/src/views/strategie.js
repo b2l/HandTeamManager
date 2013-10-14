@@ -33,7 +33,7 @@ StrategieView.prototype._render = function() {
     this.paper = new Paper.PaperScope();
     this.paper.setup(canvas);
 
-    var terrain = new Terrain(this.paper, 800, 400, 400, 100);
+    var terrain = new Terrain(this.paper, 1200, 600, 100, 100);
     terrain.draw();
     terrain.placeDefence('1-5');
 
@@ -70,14 +70,13 @@ StrategieView.prototype.paperOnMouseDrag = function(e) {
 
         if (vector) {
             ball.position = this.dragItem.position.add(vector);
-            ball.moveAbove();
         }
         if (this.recording) {
             this.combi.push({
                 x: e.middlePoint.x,
                 y: e.middlePoint.y,
                 name: this.dragItem.name
-            })
+            });
         }
     }
 };

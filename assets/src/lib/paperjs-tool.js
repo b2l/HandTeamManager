@@ -1,5 +1,5 @@
-var Paper = require('../lib/paper-full.min.js').exports;
-var _ = require('../lib/underscore-1.5.2.js');
+var Paper = require('paper-full.min.js').exports;
+var _ = require('underscore-1.5.2.js');
 
 function Terrain(paper, longueur, largeur, offsetLeft, offsetTop) {
     this.longueur = longueur;

@@ -6,21 +6,11 @@ module.exports = function (grunt) {
     // Project configuration.
     grunt.initConfig({
 
-        /* Update version */
-        'bumpup': {
-            options: {
-                version: function (old, type) {
-                    return old.replace(/([\d])+$/, grunt.option('wc-version'));
-                }
-            },
-            file: 'package.json'
-        },
-
         /* DEV MODE - auto compile & test */
         'watch': {
             'src': {
                 files: ['src/**/*.js'],
-                tasks: ['browserify']
+                tasks: ['jshint', 'browserify']
             }
         },
 
@@ -28,12 +18,11 @@ module.exports = function (grunt) {
             options: {
                 debug: true
             },
-            'demo/app.js': ['src/app.js']
+            'public/js/app.js': ['src/app.js']
         }
     });
 
     grunt.registerTask('build', ['jshint']);
-    grunt.registerTask('dist', ['jshint', 'bumpup']);
     grunt.registerTask('dev', ['browserify', 'watch']);
     grunt.registerTask('test', ['browserify', 'testem:ci:spa', 'testem:ci:qunit']);
     grunt.registerTask('default', ['watch']);
