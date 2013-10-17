@@ -10,7 +10,7 @@ module.exports = {
     },
 
     allCombi: function(req, res) {
-        res.json(storage.getItem('combis'));
+        res.json(storage.getItem('combis') || []);
     },
 
     saveCombi: function(req, res) {
