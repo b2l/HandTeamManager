@@ -23,4 +23,7 @@ app.delete('/combis/:id', function(req, res) {
     appController.delete(req, res);
 });
 
-app.listen(process.env.PORT || 3000);
+var port = process.env.PORT || 3000
+app.listen(port, function() {
+    console.log("listening on  " + port)
+});
