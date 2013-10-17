@@ -12,13 +12,18 @@ function Terrain(paper, longueur, largeur, offsetLeft, offsetTop) {
 Terrain.prototype.draw = function() {
     renderTerrain(this.offsetLeft, this.offsetTop, this.longueur, this.largeur);
     renderPlayers(this.offsetLeft, this.offsetTop, this.longueur, this.largeur);
+
+    this.placePlayers();
+
+    this.getItemByName('ball').position = this.getItemByName('t1DC').position.subtract(new Paper.Point(15, 0));
+};
+
+Terrain.prototype.placePlayers = function() {
     var positionAttaque = placePlayer(this.longueur, this.largeur, this.offsetLeft, this.offsetTop);
 
     _.each(positionAttaque, function(pos, poste) {
         return this.getItemByName("t1" + poste).position = pos;
     }, this);
-
-    this.getItemByName('ball').position = this.getItemByName('t1DC').position.subtract(new Paper.Point(15, 0));
 };
 
 Terrain.prototype.placeDefence = function(defenseType) {

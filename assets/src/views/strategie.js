@@ -40,9 +40,9 @@ StrategieView.prototype._render = function() {
     this.paper = new Paper.PaperScope();
     this.paper.setup(canvas);
 
-    var terrain = new Terrain(this.paper, 1200, 600, 100, 100);
-    terrain.draw();
-    terrain.placeDefence('1-5');
+    this.terrain = new Terrain(this.paper, 1200, 600, 100, 100);
+    this.terrain.draw();
+    this.terrain.placeDefence('1-5');
 
     this.tool = new Paper.Tool();
 
@@ -84,6 +84,14 @@ StrategieView.prototype.paperOnMouseDrag = function(e) {
                 y: e.middlePoint.y,
                 name: this.dragItem.name
             });
+
+            var ballPos = this.getItemByNodeName('ball').position;
+            this.combi.push({
+                x: ballPos.x,
+                y: ballPos.y,
+                name: 'ball'
+            });
+
         }
     }
 };
@@ -110,9 +118,13 @@ StrategieView.prototype.record = function() {
 };
 
 StrategieView.prototype.play = function(e) {
+    this.terrain.placePlayers();
+    this.terrain.placeDefence('1-5');
+
     this.combi = this.combis.filter(function(combi) {
+        console.log(Number(combi.id), Number(e.target.getAttribute('data-combi-id')));
         return Number(combi.id) === Number(e.target.getAttribute('data-combi-id'));
-    })[0].combi;
+    })[0].combi.slice(0);
     this.playing = true;
 };
 
@@ -123,6 +135,14 @@ StrategieView.prototype.getItemByNodeName = function(nodeName) {
 StrategieView.prototype._play = function() {
     var step = this.combi.shift();
     var item = this.getItemByNodeName(step.name);
+    item.position = new Paper.Point(step.x, step.y);
+
+    if (this.combi.length === 0) {
+        this.playing = false;
+    }
+
+    step = this.combi.shift();
+    item = this.getItemByNodeName(step.name);
     item.position = new Paper.Point(step.x, step.y);
 };
 

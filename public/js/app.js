@@ -171,7 +171,7 @@ JoueurView.prototype.addJoueur = function(e) {
 
 module.exports = JoueurView;
 
-},{"../models/joueur.js":10,"../View.js":8,"../lib/underscore-1.5.2.js":9}],5:[function(require,module,exports){
+},{"../lib/underscore-1.5.2.js":9,"../View.js":8,"../models/joueur.js":10}],5:[function(require,module,exports){
 var View = require('../View.js');
 var _ = require('../lib/underscore-1.5.2.js');
 var Paper = require('../lib/paper-full.min.js').exports;
@@ -451,9 +451,9 @@ StrategieView.prototype._render = function() {
     this.paper = new Paper.PaperScope();
     this.paper.setup(canvas);
 
-    var terrain = new Terrain(this.paper, 1200, 600, 100, 100);
-    terrain.draw();
-    terrain.placeDefence('1-5');
+    this.terrain = new Terrain(this.paper, 1200, 600, 100, 100);
+    this.terrain.draw();
+    this.terrain.placeDefence('1-5');
 
     this.tool = new Paper.Tool();
 
@@ -495,6 +495,14 @@ StrategieView.prototype.paperOnMouseDrag = function(e) {
                 y: e.middlePoint.y,
                 name: this.dragItem.name
             });
+
+            var ballPos = this.getItemByNodeName('ball').position;
+            this.combi.push({
+                x: ballPos.x,
+                y: ballPos.y,
+                name: 'ball'
+            });
+
         }
     }
 };
@@ -521,9 +529,13 @@ StrategieView.prototype.record = function() {
 };
 
 StrategieView.prototype.play = function(e) {
+    this.terrain.placePlayers();
+    this.terrain.placeDefence('1-5');
+
     this.combi = this.combis.filter(function(combi) {
+        console.log(Number(combi.id), Number(e.target.getAttribute('data-combi-id')));
         return Number(combi.id) === Number(e.target.getAttribute('data-combi-id'));
-    })[0].combi;
+    })[0].combi.slice(0);
     this.playing = true;
 };
 
@@ -534,6 +546,14 @@ StrategieView.prototype.getItemByNodeName = function(nodeName) {
 StrategieView.prototype._play = function() {
     var step = this.combi.shift();
     var item = this.getItemByNodeName(step.name);
+    item.position = new Paper.Point(step.x, step.y);
+
+    if (this.combi.length === 0) {
+        this.playing = false;
+    }
+
+    step = this.combi.shift();
+    item = this.getItemByNodeName(step.name);
     item.position = new Paper.Point(step.x, step.y);
 };
 
@@ -556,7 +576,7 @@ StrategieView.prototype.saveCombi = function saveCombi(e) {
 };
 
 module.exports = StrategieView;
-},{"../View.js":8,"../lib/paper-full.min.js":11,"../lib/paperjs-tool.js":12,"../lib/underscore-1.5.2.js":9,"../lib/xhr":7}],9:[function(require,module,exports){
+},{"../View.js":8,"../lib/underscore-1.5.2.js":9,"../lib/paper-full.min.js":11,"../lib/paperjs-tool.js":12,"../lib/xhr":7}],9:[function(require,module,exports){
 (function(){//     Underscore.js 1.5.2
 //     http://underscorejs.org
 //     (c) 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -618,13 +638,18 @@ function Terrain(paper, longueur, largeur, offsetLeft, offsetTop) {
 Terrain.prototype.draw = function() {
     renderTerrain(this.offsetLeft, this.offsetTop, this.longueur, this.largeur);
     renderPlayers(this.offsetLeft, this.offsetTop, this.longueur, this.largeur);
+
+    this.placePlayers();
+
+    this.getItemByName('ball').position = this.getItemByName('t1DC').position.subtract(new Paper.Point(15, 0));
+};
+
+Terrain.prototype.placePlayers = function() {
     var positionAttaque = placePlayer(this.longueur, this.largeur, this.offsetLeft, this.offsetTop);
 
     _.each(positionAttaque, function(pos, poste) {
         return this.getItemByName("t1" + poste).position = pos;
     }, this);
-
-    this.getItemByName('ball').position = this.getItemByName('t1DC').position.subtract(new Paper.Point(15, 0));
 };
 
 Terrain.prototype.placeDefence = function(defenseType) {
