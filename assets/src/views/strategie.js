@@ -19,12 +19,11 @@ function StrategieView(selector) {
     this.events = {
         'click': {
             '.record': this.record,
-            '.play': this.play,
-            '.save': this.saveCombi
+            '.save': this.saveCombi,
+            '.combi': this.play
         }
     };
 }
-
 
 StrategieView.prototype.setModel = function setModel(model) {
     this.combis = model;
@@ -94,7 +93,7 @@ StrategieView.prototype.paperOnMouseUp = function(e) {
 };
 
 StrategieView.prototype.paperOnFrame = function(e) {
-    if (this.combi.length > 0 && this.playing) {
+    if (this.combi && this.combi.length > 0 && this.playing) {
         this._play();
     }
 };
@@ -110,8 +109,10 @@ StrategieView.prototype.record = function() {
     }
 };
 
-StrategieView.prototype.play = function() {
-    this.combi = JSON.parse(sessionStorage.getItem('combi'));
+StrategieView.prototype.play = function(e) {
+    this.combi = this.combis.filter(function(combi) {
+        return Number(combi.id) === Number(e.target.getAttribute('data-combi-id'));
+    })[0].combi;
     this.playing = true;
 };
 

@@ -171,7 +171,7 @@ JoueurView.prototype.addJoueur = function(e) {
 
 module.exports = JoueurView;
 
-},{"../View.js":8,"../models/joueur.js":10,"../lib/underscore-1.5.2.js":9}],5:[function(require,module,exports){
+},{"../models/joueur.js":10,"../View.js":8,"../lib/underscore-1.5.2.js":9}],5:[function(require,module,exports){
 var View = require('../View.js');
 var _ = require('../lib/underscore-1.5.2.js');
 var Paper = require('../lib/paper-full.min.js').exports;
@@ -430,12 +430,11 @@ function StrategieView(selector) {
     this.events = {
         'click': {
             '.record': this.record,
-            '.play': this.play,
-            '.save': this.saveCombi
+            '.save': this.saveCombi,
+            '.combi': this.play
         }
     };
 }
-
 
 StrategieView.prototype.setModel = function setModel(model) {
     this.combis = model;
@@ -505,7 +504,7 @@ StrategieView.prototype.paperOnMouseUp = function(e) {
 };
 
 StrategieView.prototype.paperOnFrame = function(e) {
-    if (this.combi.length > 0 && this.playing) {
+    if (this.combi && this.combi.length > 0 && this.playing) {
         this._play();
     }
 };
@@ -521,8 +520,10 @@ StrategieView.prototype.record = function() {
     }
 };
 
-StrategieView.prototype.play = function() {
-    this.combi = JSON.parse(sessionStorage.getItem('combi'));
+StrategieView.prototype.play = function(e) {
+    this.combi = this.combis.filter(function(combi) {
+        return Number(combi.id) === Number(e.target.getAttribute('data-combi-id'));
+    })[0].combi;
     this.playing = true;
 };
 
@@ -555,7 +556,7 @@ StrategieView.prototype.saveCombi = function saveCombi(e) {
 };
 
 module.exports = StrategieView;
-},{"../View.js":8,"../lib/underscore-1.5.2.js":9,"../lib/paper-full.min.js":11,"../lib/paperjs-tool.js":12,"../lib/xhr":7}],9:[function(require,module,exports){
+},{"../View.js":8,"../lib/paper-full.min.js":11,"../lib/paperjs-tool.js":12,"../lib/underscore-1.5.2.js":9,"../lib/xhr":7}],9:[function(require,module,exports){
 (function(){//     Underscore.js 1.5.2
 //     http://underscorejs.org
 //     (c) 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -827,7 +828,7 @@ function renderTerrain(x, y, longueur, largeur) {
 
 module.exports = Terrain;
 
-},{"./underscore-1.5.2.js":9,"./paper-full.min.js":11}],10:[function(require,module,exports){
+},{"./paper-full.min.js":11,"./underscore-1.5.2.js":9}],10:[function(require,module,exports){
 var Model = require('../Model').Model;
 
 Joueur.prototype = new Model();
