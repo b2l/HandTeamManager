@@ -3,6 +3,7 @@ var Joueurs = require('./models/joueurs');
 var JoueurView = require('./views/joueur');
 var CompositionView = require('./views/composition');
 var StrategieView = require('./views/strategie');
+var XHR = require('./lib/xhr');
 
 function startEdit(e) {
     var value = e.target.innerHTML;
@@ -35,6 +36,7 @@ Gator(document).on('keydown', '.editable .editing', editKeyListener);
 var App = {
     currentView: null,
     _goto: function(routes) {
+
         if (App[routes]) {
             if (this.currentView) {
                 this.currentView.destroy.call(this.currentView);
@@ -77,12 +79,13 @@ var App = {
         this.currentView = compoView;
     },
     strat: function() {
+        var xhr = new XHR();
         var stratView = new StrategieView('#content');
-        stratView.render();
+        xhr.get('/combis').success(function(data) {
+            stratView.setModel(JSON.parse(data));
+        }).send();
         this.currentView = stratView;
     }
 };
 
-window.onload = function() {
-    App.init();
-}
+App.init();

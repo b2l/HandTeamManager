@@ -1,19 +1,26 @@
 var express = require("express");
-var EE = require('events').EventEmitter;
-var fs = require("fs");
-var controllers = require('./controllers');
+var appController = require('./controllers/app');
 
-var Router = require('./router');
-router = new Router(controllers);
+var app = express();
 
+app.use('/public', express.static(__dirname + '/../public'));
 
-var app = module.exports = express();
-
-app.use('/public', express.static(__dirname + '/public'));
 app.use(express.bodyParser());
 
-var Events = new EE;
+app.get('/', function(req, res) {
+    appController.index(req, res);
+});
 
-app.all('*', router.dispatch);
+app.get('/combis', function(req, res) {
+    appController.allCombi(req, res);
+});
+
+app.post('/combis', function(req, res) {
+    appController.saveCombi(req, res);
+});
+
+app.delete('/combis/:id', function(req, res) {
+    appController.delete(req, res);
+});
 
 app.listen(process.env.PORT || 3000);

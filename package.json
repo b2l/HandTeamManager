@@ -22,7 +22,8 @@
         "mongodb": "1.2.10",
         "grunt": "~0.4.1",
         "grunt-contrib-watch": "~0.5.3",
-        "grunt-browserify": "1.0.2"
+        "grunt-browserify": "1.0.2",
+        "node-persist": "0.0.1"
     },
     "engines": {
         "node": ">=0.4.0"

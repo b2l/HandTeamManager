@@ -2,6 +2,7 @@ var View = require('../View.js');
 var _ = require('../lib/underscore-1.5.2.js');
 var Paper = require('../lib/paper-full.min.js').exports;
 var Terrain = require('../lib/paperjs-tool.js');
+var XHR = require('../lib/xhr');
 
 StrategieView.prototype = new View();
 StrategieView.constructor = StrategieView;
@@ -13,20 +14,27 @@ function StrategieView(selector) {
     this.combi = [];
     this.tool;
     this.playersNode = null;
+    this.playing = false;
 
     this.events = {
         'click': {
             '.record': this.record,
-            '.play': this.play
+            '.play': this.play,
+            '.save': this.saveCombi
         }
     };
 }
 
 
+StrategieView.prototype.setModel = function setModel(model) {
+    this.combis = model;
+    this.render();
+};
+
 StrategieView.prototype._render = function() {
     var tplContent = document.getElementById('strat-template').innerHTML;
     var tpl = _.template(tplContent);
-    document.querySelector(this.$el).innerHTML = tpl();
+    document.querySelector(this.$el).innerHTML = tpl({combis: this.combis});
 
     var canvas = document.getElementById('canvas-compo');
 
@@ -86,7 +94,7 @@ StrategieView.prototype.paperOnMouseUp = function(e) {
 };
 
 StrategieView.prototype.paperOnFrame = function(e) {
-    if (this.combi.length > 0 && !this.recording) {
+    if (this.combi.length > 0 && this.playing) {
         this._play();
     }
 };
@@ -96,6 +104,7 @@ StrategieView.prototype.record = function() {
 
     if (!this.recording) {
         sessionStorage.setItem('combi', JSON.stringify(this.combi));
+        this.renderSaveBox();
     } else {
         sessionStorage.removeItem('combi');
     }
@@ -103,15 +112,35 @@ StrategieView.prototype.record = function() {
 
 StrategieView.prototype.play = function() {
     this.combi = JSON.parse(sessionStorage.getItem('combi'));
+    this.playing = true;
 };
 
 StrategieView.prototype.getItemByNodeName = function(nodeName) {
     return this.paper.project.layers[0].children[nodeName];
-}
+};
 
 StrategieView.prototype._play = function() {
     var step = this.combi.shift();
     var item = this.getItemByNodeName(step.name);
     item.position = new Paper.Point(step.x, step.y);
-}
+};
+
+StrategieView.prototype.renderSaveBox = function renderSaveBox() {
+    document.querySelector(this.$el + ' .save-box').style.display = "block";
+};
+
+StrategieView.prototype.saveCombi = function saveCombi(e) {
+    var xhr = new XHR();
+    var name = document.querySelector(this.$el + " input[name='name']").value;
+    var data = {
+        name: name,
+        combi: this.combi
+    };
+    xhr.post('/combis').success(
+        function(xhrData) {
+            console.log('Combi saved');
+        }
+    ).send(data);
+};
+
 module.exports = StrategieView;

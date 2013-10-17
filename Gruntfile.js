@@ -9,21 +9,19 @@ module.exports = function (grunt) {
         /* DEV MODE - auto compile & test */
         'watch': {
             'src': {
-                files: ['src/**/*.js'],
-                tasks: ['jshint', 'browserify']
+                files: ['assets/**/*.js'],
+                tasks: ['browserify']
             }
         },
 
         browserify: {
-            options: {
-                debug: true
-            },
-            'public/js/app.js': ['src/app.js']
+            'dist': {
+                files: {
+                    'public/js/app.js': [__dirname + '/assets/src/app.js']
+                }
+            }
         }
     });
 
-    grunt.registerTask('build', ['jshint']);
-    grunt.registerTask('dev', ['browserify', 'watch']);
-    grunt.registerTask('test', ['browserify', 'testem:ci:spa', 'testem:ci:qunit']);
-    grunt.registerTask('default', ['watch']);
+    grunt.registerTask('default', ['browserify', 'watch']);
 };
