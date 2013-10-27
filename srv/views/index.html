@@ -110,7 +110,6 @@
 
 <script type="text/x-template" id="strat-template">
     <button class='record'>Record</button>
-    <button class='play'>Play</button>
 
     <div class="save-box" style="display: none;">
         <input type="text" name="name" placeholder="Nom de la combinaison"/>
@@ -119,7 +118,7 @@
 
     <ul>
         <% _.each(combis, function(combi) { %>
-            <li><%= combi.name %></li>
+            <li class="combi" data-combi-id="<%= combi.id %>"><%= combi.name %></li>
         <% }) %>
     </ul>
 

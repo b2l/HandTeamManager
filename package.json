@@ -14,10 +14,8 @@
         "singlepageapp"
     ],
     "dependencies": {
-        "microee": "~0.0.2"
-    },
-    "devDependencies": {
         "express": "3.x",
+        "microee": "~0.0.2",
         "ejs" : "x",
         "mongodb": "1.2.10",
         "grunt": "~0.4.1",

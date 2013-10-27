@@ -6,6 +6,7 @@ var StrategieView = require('./views/strategie');
 var XHR = require('./lib/xhr');
 
 function startEdit(e) {
+
     var value = e.target.innerHTML;
     var property = e.target.getAttribute('data-property-name');
     var tpl = "<input class='editing' type='text' name='" + property + "' value='" + value + "'/>";

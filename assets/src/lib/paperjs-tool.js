@@ -12,13 +12,18 @@ function Terrain(paper, longueur, largeur, offsetLeft, offsetTop) {
 Terrain.prototype.draw = function() {
     renderTerrain(this.offsetLeft, this.offsetTop, this.longueur, this.largeur);
     renderPlayers(this.offsetLeft, this.offsetTop, this.longueur, this.largeur);
+
+    this.placePlayers();
+
+    this.getItemByName('ball').position = this.getItemByName('t1DC').position.subtract(new Paper.Point(15, 0));
+};
+
+Terrain.prototype.placePlayers = function() {
     var positionAttaque = placePlayer(this.longueur, this.largeur, this.offsetLeft, this.offsetTop);
 
     _.each(positionAttaque, function(pos, poste) {
         return this.getItemByName("t1" + poste).position = pos;
     }, this);
-
-    this.getItemByName('ball').position = this.getItemByName('t1DC').position.subtract(new Paper.Point(15, 0));
 };
 
 Terrain.prototype.placeDefence = function(defenseType) {
@@ -97,8 +102,8 @@ function getDefensePosition(typeDefense, longueur, largeur, offsetLeft, offsetTo
         '1-5': {
             'G': {x: longueurRatio(0, longueur) + offsetLeft, y: largeurRatio(100, largeur) + offsetTop},
             'PV': {x: longueurRatio(100, longueur) + offsetLeft, y: largeurRatio(100, largeur) + offsetTop},
-            'AiG': {x: longueurRatio(10, longueur) + offsetLeft, y: largeurRatio(10, largeur) + offsetTop},
-            'AiD': {x: longueurRatio(10, longueur) + offsetLeft, y: largeurRatio(190, largeur) + offsetTop},
+            'AiG': {x: longueurRatio(20, longueur) + offsetLeft, y: largeurRatio(23, largeur) + offsetTop},
+            'AiD': {x: longueurRatio(20, longueur) + offsetLeft, y: largeurRatio(177, largeur) + offsetTop},
             'AG': {x: longueurRatio(70, longueur) + offsetLeft, y: largeurRatio(45, largeur) + offsetTop},
             'DC': {x: longueurRatio(70, longueur) + offsetLeft, y: largeurRatio(90, largeur) + offsetTop},
             'AD': {x: longueurRatio(70, longueur) + offsetLeft, y: largeurRatio(155, largeur) + offsetTop}

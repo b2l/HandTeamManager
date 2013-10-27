@@ -7,6 +7,7 @@ var StrategieView = require('./views/strategie');
 var XHR = require('./lib/xhr');
 
 function startEdit(e) {
+
     var value = e.target.innerHTML;
     var property = e.target.getAttribute('data-property-name');
     var tpl = "<input class='editing' type='text' name='" + property + "' value='" + value + "'/>";
@@ -93,7 +94,7 @@ var App = {
 };
 
 App.init();
-},{"./models/joueurs":2,"./views/app":3,"./views/joueur":4,"./views/composition":5,"./views/strategie":6,"./lib/xhr":7}],3:[function(require,module,exports){
+},{"./views/app":2,"./models/joueurs":3,"./views/joueur":4,"./views/composition":5,"./views/strategie":6,"./lib/xhr":7}],2:[function(require,module,exports){
 var View = require('../View.js');
 var _ = require('../lib/underscore-1.5.2.js');
 
@@ -174,7 +175,7 @@ JoueurView.prototype.addJoueur = function(e) {
 
 module.exports = JoueurView;
 
-},{"../lib/underscore-1.5.2.js":9,"../models/joueur.js":10,"../View.js":8}],5:[function(require,module,exports){
+},{"../View.js":8,"../models/joueur.js":10,"../lib/underscore-1.5.2.js":9}],5:[function(require,module,exports){
 var View = require('../View.js');
 var _ = require('../lib/underscore-1.5.2.js');
 var Paper = require('../lib/paper-full.min.js').exports;
@@ -268,7 +269,7 @@ CompositionView.prototype.renderCompo = function() {
 };
 
 module.exports = CompositionView;
-},{"../lib/underscore-1.5.2.js":9,"../View.js":8,"../lib/paper-full.min.js":11,"../lib/paperjs-tool.js":12}],7:[function(require,module,exports){
+},{"../View.js":8,"../lib/underscore-1.5.2.js":9,"../lib/paper-full.min.js":11,"../lib/paperjs-tool.js":12}],7:[function(require,module,exports){
 var _ = require('./underscore-1.5.2.js');
 
 function XHR() {
@@ -361,7 +362,7 @@ XHR.prototype = {
 };
 
 module.exports = XHR;
-},{"./underscore-1.5.2.js":9}],2:[function(require,module,exports){
+},{"./underscore-1.5.2.js":9}],3:[function(require,module,exports){
 var ModelList = require('../Model').ModelList;
 var Joueur = require('./joueur');
 
@@ -411,7 +412,7 @@ var joueurs = [
 module.exports = Joueurs;
 
 
-},{"./joueur":10,"../Model":13}],6:[function(require,module,exports){
+},{"../Model":13,"./joueur":10}],6:[function(require,module,exports){
 var View = require('../View.js');
 var _ = require('../lib/underscore-1.5.2.js');
 var Paper = require('../lib/paper-full.min.js').exports;
@@ -433,12 +434,11 @@ function StrategieView(selector) {
     this.events = {
         'click': {
             '.record': this.record,
-            '.play': this.play,
-            '.save': this.saveCombi
+            '.save': this.saveCombi,
+            '.combi': this.play
         }
     };
 }
-
 
 StrategieView.prototype.setModel = function setModel(model) {
     this.combis = model;
@@ -455,9 +455,9 @@ StrategieView.prototype._render = function() {
     this.paper = new Paper.PaperScope();
     this.paper.setup(canvas);
 
-    var terrain = new Terrain(this.paper, 1200, 600, 100, 100);
-    terrain.draw();
-    terrain.placeDefence('1-5');
+    this.terrain = new Terrain(this.paper, 1200, 600, 100, 100);
+    this.terrain.draw();
+    this.terrain.placeDefence('1-5');
 
     this.tool = new Paper.Tool();
 
@@ -499,6 +499,14 @@ StrategieView.prototype.paperOnMouseDrag = function(e) {
                 y: e.middlePoint.y,
                 name: this.dragItem.name
             });
+
+            var ballPos = this.getItemByNodeName('ball').position;
+            this.combi.push({
+                x: ballPos.x,
+                y: ballPos.y,
+                name: 'ball'
+            });
+
         }
     }
 };
@@ -508,7 +516,7 @@ StrategieView.prototype.paperOnMouseUp = function(e) {
 };
 
 StrategieView.prototype.paperOnFrame = function(e) {
-    if (this.combi.length > 0 && this.playing) {
+    if (this.combi && this.combi.length > 0 && this.playing) {
         this._play();
     }
 };
@@ -524,8 +532,14 @@ StrategieView.prototype.record = function() {
     }
 };
 
-StrategieView.prototype.play = function() {
-    this.combi = JSON.parse(sessionStorage.getItem('combi'));
+StrategieView.prototype.play = function(e) {
+    this.terrain.placePlayers();
+    this.terrain.placeDefence('1-5');
+
+    this.combi = this.combis.filter(function(combi) {
+        console.log(Number(combi.id), Number(e.target.getAttribute('data-combi-id')));
+        return Number(combi.id) === Number(e.target.getAttribute('data-combi-id'));
+    })[0].combi.slice(0);
     this.playing = true;
 };
 
@@ -536,6 +550,14 @@ StrategieView.prototype.getItemByNodeName = function(nodeName) {
 StrategieView.prototype._play = function() {
     var step = this.combi.shift();
     var item = this.getItemByNodeName(step.name);
+    item.position = new Paper.Point(step.x, step.y);
+
+    if (this.combi.length === 0) {
+        this.playing = false;
+    }
+
+    step = this.combi.shift();
+    item = this.getItemByNodeName(step.name);
     item.position = new Paper.Point(step.x, step.y);
 };
 
@@ -620,13 +642,18 @@ function Terrain(paper, longueur, largeur, offsetLeft, offsetTop) {
 Terrain.prototype.draw = function() {
     renderTerrain(this.offsetLeft, this.offsetTop, this.longueur, this.largeur);
     renderPlayers(this.offsetLeft, this.offsetTop, this.longueur, this.largeur);
+
+    this.placePlayers();
+
+    this.getItemByName('ball').position = this.getItemByName('t1DC').position.subtract(new Paper.Point(15, 0));
+};
+
+Terrain.prototype.placePlayers = function() {
     var positionAttaque = placePlayer(this.longueur, this.largeur, this.offsetLeft, this.offsetTop);
 
     _.each(positionAttaque, function(pos, poste) {
         return this.getItemByName("t1" + poste).position = pos;
     }, this);
-
-    this.getItemByName('ball').position = this.getItemByName('t1DC').position.subtract(new Paper.Point(15, 0));
 };
 
 Terrain.prototype.placeDefence = function(defenseType) {
@@ -705,8 +732,8 @@ function getDefensePosition(typeDefense, longueur, largeur, offsetLeft, offsetTo
         '1-5': {
             'G': {x: longueurRatio(0, longueur) + offsetLeft, y: largeurRatio(100, largeur) + offsetTop},
             'PV': {x: longueurRatio(100, longueur) + offsetLeft, y: largeurRatio(100, largeur) + offsetTop},
-            'AiG': {x: longueurRatio(10, longueur) + offsetLeft, y: largeurRatio(10, largeur) + offsetTop},
-            'AiD': {x: longueurRatio(10, longueur) + offsetLeft, y: largeurRatio(190, largeur) + offsetTop},
+            'AiG': {x: longueurRatio(20, longueur) + offsetLeft, y: largeurRatio(23, largeur) + offsetTop},
+            'AiD': {x: longueurRatio(20, longueur) + offsetLeft, y: largeurRatio(177, largeur) + offsetTop},
             'AG': {x: longueurRatio(70, longueur) + offsetLeft, y: largeurRatio(45, largeur) + offsetTop},
             'DC': {x: longueurRatio(70, longueur) + offsetLeft, y: largeurRatio(90, largeur) + offsetTop},
             'AD': {x: longueurRatio(70, longueur) + offsetLeft, y: largeurRatio(155, largeur) + offsetTop}
