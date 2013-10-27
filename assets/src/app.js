@@ -48,22 +48,22 @@ var App = {
     },
     init: function() {
         var appView = new AppView('#app-wrapper');
-        appView.events = {
-            'click': {
-                'li.joueurs': function () {
-                    this._goto('joueurs');
-                }.bind(this),
-                'li.compo': function () {
-                    this._goto('compo');
-                }.bind(this),
-                'li.strategie': function () {
-                    this._goto('strat');
-                }.bind(this)
-            }
-        };
+//        appView.events = {
+//            'click': {
+//                'li.joueurs': function () {
+//                    this._goto('joueurs');
+//                }.bind(this),
+//                'li.compo': function () {
+//                    this._goto('compo');
+//                }.bind(this),
+//                'li.strategie': function () {
+//                    this._goto('strat');
+//                }.bind(this)
+//            }
+//        };
         appView.render();
 
-        this._goto('joueurs');
+        this._goto('strat');
     },
     joueurs: function () {
         var joueurs = new Joueurs();

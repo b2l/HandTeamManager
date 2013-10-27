@@ -1,8 +1,54 @@
-var storage = require('node-persist');
+var MongoClient = require('mongodb').MongoClient;
+var ObjectID = require('mongodb').ObjectID;
+var EE = require('events').EventEmitter;
 
-storage.initSync({
-    dir: __dirname + '/../data'
-});
+var Events = new EE();
+
+var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || "mongodb://localhost:27017/hand";
+
+var db = {
+    connect: function() {
+        var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || "mongodb://localhost:27017/links";
+
+        MongoClient.connect(mongoUri, function(err, db) {
+            if (err) {
+                Events.emit('db.err', err);
+            } else {
+                Events.emit('db.connected', db);
+            }
+        });
+    },
+    find: function(collection) {
+        Events.on('db.connected', function callback(db) {
+            var coll = db.collection(collection);
+            coll.find().toArray(function (err, items) {
+                if (err) {
+                    Events.emit('db.err', err);
+                } else {
+                    Events.emit('db.found', items);
+                }
+            });
+
+            Events.removeListener('db.connected', callback);
+        });
+        this.connect();
+    },
+    insert: function(item, collection) {
+        Events.on("db.connected", function callback(db) {
+            var coll = db.collection(collection);
+            coll.insert(item, function(err, result) {
+                if (err) {
+                    Events.emit('db.err', err);
+                } else {
+                    Events.emit('db.inserted', result[0]);
+                }
+            });
+
+            Events.removeListener('db.connected', callback);
+        });
+        this.connect();
+    }
+};
 
 module.exports = {
     index: function(req, res) {
@@ -10,7 +56,19 @@ module.exports = {
     },
 
     allCombi: function(req, res) {
-        res.json(storage.getItem('combis') || []);
+        Events.on('db.found', function onSuccess(combis) {
+            res.json(combis);
+
+            Events.removeListener('db.found', onSuccess);
+        });
+        Events.on("db.err", function onError(err) {
+            console.log(err);
+            res.json(err);
+
+            Events.removeListener('db.err', onError);
+        });
+
+        db.find('combis');
     },
 
     saveCombi: function(req, res) {
@@ -20,21 +78,21 @@ module.exports = {
         });
 
         req.on('end', function() {
-            var params = JSON.parse(body);
-            var combis = storage.getItem('combis') || [];
-            var id = combis.length;
-            params.id = id;
+            var combi = JSON.parse(body);
+            Events.on('db.inserted', function onSuccess(savedCombi) {
+                res.json(savedCombi);
 
-            var unique = combis.filter(function(combi) {
-                return combi.name === params.name;
+                Events.removeListener('db.inserted', onSuccess);
             });
 
-            if (unique.length === 0) {
-                combis.push(params);
-                storage.setItem('combis', combis);
-            } else {
-                res.json(500, {error: "une combinaison avec ce nom existe déjà"});
-            }
+            Events.on("db.err", function onError(err) {
+                console.log(err);
+                res.json(err);
+
+                Events.removeListener   ('db.err', onError);
+            });
+
+            db.insert(combi, 'combis');
         });
     },
 

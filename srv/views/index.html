@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Hand Team Manager</title>
+    <title>Hand Strategie</title>
+    <link rel="stylesheet" href="/public/css/bootstrap.min.css" />
     <link rel="stylesheet" href="/public/css/app.css" />
     <meta charset="UTF-8">
 </head>
@@ -11,16 +12,17 @@
 
 </body>
 
+<script type="text/javascript" src="/public/js/bootstrap.min.js"></script>
 <!-- START TEMPLATES -->
 
 <script type="text/x-template" id="app-template">
-    <h1>Hand Team Manager</h1>
+    <h1>Hand Strategie</h1>
 
-    <nav>
-        <li class="joueurs">Joueurs</li>
-        <li class="compo">Composition d'équipe</li>
-        <li class="strategie">Strategie</li>
-    </nav>
+    <!--<nav>-->
+        <!--<li class="joueurs">Joueurs</li>-->
+        <!--<li class="compo">Composition d'équipe</li>-->
+        <!--<li class="strategie">Strategie</li>-->
+    <!--</nav>-->
 
     <div id="content">
     </div>
@@ -109,7 +111,10 @@
 </script>
 
 <script type="text/x-template" id="strat-template">
-    <button class='record'>Record</button>
+    <div class="btn-group">
+        <button class='btn record'>Record</button>
+        <button class='btn reset'>Reinitialiser</button>
+    </div>
 
     <div class="save-box" style="display: none;">
         <input type="text" name="name" placeholder="Nom de la combinaison"/>
@@ -118,11 +123,11 @@
 
     <ul>
         <% _.each(combis, function(combi) { %>
-            <li class="combi" data-combi-id="<%= combi.id %>"><%= combi.name %></li>
+            <li class="combi" data-combi-id="<%= combi._id %>"><%= combi.name %></li>
         <% }) %>
     </ul>
 
-    <canvas id="canvas-compo" resize></canvas>
+    <canvas id="canvas-compo" height="550" width="1000"></canvas>
 </script>
 <!-- END TEMPLATES -->
 

@@ -1,6 +1,10 @@
 var Paper = require('./paper-full.min.js').exports;
 var _ = require('./underscore-1.5.2.js');
 
+var strokeColor = "white";
+var strokeWidth = 4;
+var background = "#202020";
+
 function Terrain(paper, longueur, largeur, offsetLeft, offsetTop) {
     this.longueur = longueur;
     this.largeur = largeur;
@@ -46,9 +50,9 @@ function longueurRatio(nb, realLongueur) {
 }
 
 function renderPlayers(offsetLeft, offsetTop, longueur, largeur) {
-    var team1color = 'blue';
+    var team1color = 'black';
     var team2color = 'red';
-    var ballColor = 'black';
+    var ballColor = 'lightblue';
 
     var ball = createPlayer.call(this, new Paper.Point(160, 25), ballColor, 5);
     ball.name = 'ball';
@@ -134,12 +138,20 @@ function renderTerrain(x, y, longueur, largeur) {
     // Le terrain
     var rect = new Paper.Rectangle(new Paper.Point(offsetLeft, offsetTop), new Paper.Size(longueur, largeur));
     var terrain = new Paper.Path.Rectangle(rect);
-    terrain.strokeColor = 'black';
+    terrain.fillColor = {
+        gradient: {
+            stops: ["#1212FF", "#B9B9FF"]
+        },
+        origin: new Paper.Point(offsetLeft, offsetTop),
+        origin: new Paper.Point(offsetLeft, offsetTop + largeur)
+    }
+    terrain.strokeColor = strokeColor;
+    terrain.strokeWidth = strokeWidth;
 
     // La zone de gauche
     var zoneRayon = largeurRatio(60, largeur);
     var largeurCage = largeurRatio(30, largeur);
-    var longueurCage = longueurRatio(20, longueur);
+    var longueurCage = longueurRatio(10, longueur);
     var zoneLargeurTotal = zoneRayon * 2 + largeurCage;
     var zoneRect = new Paper.Rectangle(new Paper.Point(offsetLeft -zoneRayon, offsetTop + (largeur - zoneLargeurTotal) / 2), new Paper.Size(zoneRayon*2, zoneLargeurTotal));
     var radius = new Paper.Size(zoneRayon);
@@ -148,8 +160,9 @@ function renderTerrain(x, y, longueur, largeur) {
     zoneGauche.removeSegment(0);
     zoneGauche.removeSegment(0);
     zoneGauche.removeSegment(0);
-    zoneGauche.fillColor = 'yellow';
-    zoneGauche.strokeColor = 'black';
+    zoneGauche.fillColor = "#FFF973";
+    zoneGauche.strokeColor = strokeColor;
+    zoneGauche.strokeWidth = strokeWidth;
 
     // La zone de droite
     var zoneDroiteRect = zoneRect.clone();
@@ -160,8 +173,9 @@ function renderTerrain(x, y, longueur, largeur) {
     zoneDroite.removeSegment(4);
     zoneDroite.removeSegment(4);
     zoneDroite.removeSegment(4);
-    zoneDroite.fillColor = 'yellow';
-    zoneDroite.strokeColor = 'black';
+    zoneDroite.fillColor = '#FFF973';
+    zoneDroite.strokeColor = strokeColor;
+    zoneDroite.strokeWidth = strokeWidth;
 
     // Les 9m de gauche
     var neufMRayon = largeurRatio(90, largeur);
@@ -173,7 +187,8 @@ function renderTerrain(x, y, longueur, largeur) {
     neufMGauche.removeSegment(0);
     neufMGauche.removeSegment(0);
     neufMGauche.removeSegment(0);
-    neufMGauche.strokeColor = 'black';
+    neufMGauche.strokeColor = strokeColor;
+    neufMGauche.strokeWidth = strokeWidth;
 
     // Les 9m de droite
     var neufMDroiteRect = neufMGaucheRect.clone();
@@ -184,21 +199,25 @@ function renderTerrain(x, y, longueur, largeur) {
     neufMDroite.removeSegment(4);
     neufMDroite.removeSegment(4);
     neufMDroite.removeSegment(4);
-    neufMDroite.strokeColor = 'black';
+    neufMDroite.strokeColor = strokeColor;
+    neufMDroite.strokeWidth = strokeWidth;
 
     // Ligne de 7m de gauche
     var distance = 70 * longueur / 400;
     var longeurSeptM = 20 * largeur / 200;
     var septMGauche = new Paper.Path(new Paper.Point(offsetLeft + distance, offsetTop + (largeur / 2) - (longeurSeptM / 2)), new Paper.Point(offsetLeft + distance, offsetTop + (largeur / 2) + (longeurSeptM / 2)));
-    septMGauche.strokeColor = 'black';
+    septMGauche.strokeColor = strokeColor;
+    septMGauche.strokeWidth = strokeWidth;
 
     // Ligne de 7m de droite
     var septMDroite = new Paper.Path(new Paper.Point(offsetLeft + longueur - distance, offsetTop + (largeur / 2) - (longeurSeptM / 2)), new Paper.Point(offsetLeft + longueur - distance, offsetTop + (largeur / 2) + (longeurSeptM / 2)));
-    septMDroite.strokeColor = 'black';
+    septMDroite.strokeColor = strokeColor;
+    septMDroite.strokeWidth = strokeWidth;
 
     // Ligne mediane
     var mediane= new Paper.Path(new Paper.Point(offsetLeft + (longueur / 2), offsetTop), new Paper.Point(offsetLeft + (longueur / 2), largeur + offsetTop));
-    mediane.strokeColor = 'black';
+    mediane.strokeColor = strokeColor;
+    mediane.strokeWidth = strokeWidth;
 
     // Cage gauche
     var topLeft = {
@@ -207,22 +226,27 @@ function renderTerrain(x, y, longueur, largeur) {
     }
     var cageGaucheRect = new Paper.Rectangle(new Paper.Point(topLeft), new Paper.Size(longueurCage, largeurCage));
     var cageGauche = new Paper.Path.Rectangle(cageGaucheRect);
-    cageGauche.strokeColor = 'black';
+    cageGauche.strokeColor = strokeColor;
+    cageGauche.strokeWidth = strokeWidth;
+    cageGauche.fillColor = background;
 
     // Cage droite
     var cageDroiteRect = cageGaucheRect.clone();
     cageDroiteRect.left += longueur + longueurCage;
     cageDroiteRect.right += longueur + longueurCage;
     var cageDroite = new Paper.Path.Rectangle(cageDroiteRect);
-    cageDroite.strokeColor = 'black';
+    cageDroite.strokeColor = strokeColor;
+    cageDroite.strokeWidth = strokeWidth;
+    cageDroite.fillColor = background;
 
     var rect = new Paper.Rectangle(new Paper.Point(0, 0), new Paper.Point(offsetLeft + longueur + 10, offsetTop));
     var p = new Paper.Path.Rectangle(rect);
-    p.fillColor = 'white';
+    p.fillColor = background;
 
     rect = new Paper.Rectangle(new Paper.Point(0, offsetTop + largeur), new Paper.Point(offsetLeft + longueur + 10, offsetTop + largeur + 20));
     p = new Paper.Path.Rectangle(rect);
-    p.fillColor = 'white';
+    p.fillColor = background;
 }
 
 module.exports = Terrain;
+

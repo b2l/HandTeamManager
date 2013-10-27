@@ -40,7 +40,7 @@ StrategieView.prototype._render = function() {
     this.paper = new Paper.PaperScope();
     this.paper.setup(canvas);
 
-    this.terrain = new Terrain(this.paper, 1200, 600, 100, 100);
+    this.terrain = new Terrain(this.paper, 900, 450, 50, 50);
     this.terrain.draw();
     this.terrain.placeDefence('1-5');
 
@@ -122,8 +122,7 @@ StrategieView.prototype.play = function(e) {
     this.terrain.placeDefence('1-5');
 
     this.combi = this.combis.filter(function(combi) {
-        console.log(Number(combi.id), Number(e.target.getAttribute('data-combi-id')));
-        return Number(combi.id) === Number(e.target.getAttribute('data-combi-id'));
+        return combi._id === e.target.getAttribute('data-combi-id');
     })[0].combi.slice(0);
     this.playing = true;
 };

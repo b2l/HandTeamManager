@@ -1,3 +1,8 @@
+h1 {
+    height: 100px;
+    text-indent: 120px;
+    background: url(../img/bsc.jpg) no-repeat;
+}
 
 .joueur-list {
     list-style-type: none;
@@ -61,6 +66,7 @@ nav li.active {
 canvas {
     float: left;
     margin-left: 300px;
+    background-color: #202020;
 }
 
 .selection-list {
