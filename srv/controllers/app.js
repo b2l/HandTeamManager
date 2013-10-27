@@ -1,7 +1,7 @@
 var storage = require('node-persist');
 
 storage.initSync({
-    dir: '../data'
+    dir: __dirname + '/../data'
 });
 
 module.exports = {
@@ -40,14 +40,9 @@ module.exports = {
 
     getCombi: function(req, res) {
         var combiId = req.params.combiId;
-        console.log('Get the combi with id ' + combiId);
     },
 
     deleteCombi: function(req, res) {
         req.params.id
-
-
-
-        console.log('Delete the combi with id ' + combiId);
     }
 };

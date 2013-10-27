@@ -83,14 +83,17 @@ var App = {
         var xhr = new XHR();
         var stratView = new StrategieView('#content');
         xhr.get('/combis').success(function(data) {
-            stratView.setModel(JSON.parse(data));
+            if (data.length > 0)
+                stratView.setModel(JSON.parse(data));
+            else
+                stratView.setModel();
         }).send();
         this.currentView = stratView;
     }
 };
 
 App.init();
-},{"./views/app":2,"./models/joueurs":3,"./views/joueur":4,"./views/composition":5,"./views/strategie":6,"./lib/xhr":7}],2:[function(require,module,exports){
+},{"./models/joueurs":2,"./views/app":3,"./views/joueur":4,"./views/composition":5,"./views/strategie":6,"./lib/xhr":7}],3:[function(require,module,exports){
 var View = require('../View.js');
 var _ = require('../lib/underscore-1.5.2.js');
 
@@ -109,7 +112,7 @@ AppView.prototype._render = function() {
 
 module.exports = AppView;
 
-},{"../lib/underscore-1.5.2.js":8,"../View.js":9}],4:[function(require,module,exports){
+},{"../View.js":8,"../lib/underscore-1.5.2.js":9}],4:[function(require,module,exports){
 var View = require('../View.js');
 var Joueur = require('../models/joueur.js');
 var _ = require('../lib/underscore-1.5.2.js');
@@ -171,7 +174,7 @@ JoueurView.prototype.addJoueur = function(e) {
 
 module.exports = JoueurView;
 
-},{"../View.js":9,"../models/joueur.js":10,"../lib/underscore-1.5.2.js":8}],5:[function(require,module,exports){
+},{"../lib/underscore-1.5.2.js":9,"../models/joueur.js":10,"../View.js":8}],5:[function(require,module,exports){
 var View = require('../View.js');
 var _ = require('../lib/underscore-1.5.2.js');
 var Paper = require('../lib/paper-full.min.js').exports;
@@ -265,7 +268,7 @@ CompositionView.prototype.renderCompo = function() {
 };
 
 module.exports = CompositionView;
-},{"../View.js":9,"../lib/underscore-1.5.2.js":8,"../lib/paper-full.min.js":11,"../lib/paperjs-tool.js":12}],7:[function(require,module,exports){
+},{"../lib/underscore-1.5.2.js":9,"../View.js":8,"../lib/paper-full.min.js":11,"../lib/paperjs-tool.js":12}],7:[function(require,module,exports){
 var _ = require('./underscore-1.5.2.js');
 
 function XHR() {
@@ -358,7 +361,7 @@ XHR.prototype = {
 };
 
 module.exports = XHR;
-},{"./underscore-1.5.2.js":8}],3:[function(require,module,exports){
+},{"./underscore-1.5.2.js":9}],2:[function(require,module,exports){
 var ModelList = require('../Model').ModelList;
 var Joueur = require('./joueur');
 
@@ -408,7 +411,7 @@ var joueurs = [
 module.exports = Joueurs;
 
 
-},{"../Model":13,"./joueur":10}],6:[function(require,module,exports){
+},{"./joueur":10,"../Model":13}],6:[function(require,module,exports){
 var View = require('../View.js');
 var _ = require('../lib/underscore-1.5.2.js');
 var Paper = require('../lib/paper-full.min.js').exports;
@@ -555,7 +558,7 @@ StrategieView.prototype.saveCombi = function saveCombi(e) {
 };
 
 module.exports = StrategieView;
-},{"../View.js":9,"../lib/underscore-1.5.2.js":8,"../lib/paper-full.min.js":11,"../lib/paperjs-tool.js":12,"../lib/xhr":7}],8:[function(require,module,exports){
+},{"../View.js":8,"../lib/underscore-1.5.2.js":9,"../lib/paper-full.min.js":11,"../lib/paperjs-tool.js":12,"../lib/xhr":7}],9:[function(require,module,exports){
 (function(){//     Underscore.js 1.5.2
 //     http://underscorejs.org
 //     (c) 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -827,7 +830,7 @@ function renderTerrain(x, y, longueur, largeur) {
 
 module.exports = Terrain;
 
-},{"./paper-full.min.js":11,"./underscore-1.5.2.js":8}],10:[function(require,module,exports){
+},{"./paper-full.min.js":11,"./underscore-1.5.2.js":9}],10:[function(require,module,exports){
 var Model = require('../Model').Model;
 
 Joueur.prototype = new Model();
@@ -839,7 +842,7 @@ function Joueur(properties) {
 }
 
 module.exports = Joueur;
-},{"../Model":13}],9:[function(require,module,exports){
+},{"../Model":13}],8:[function(require,module,exports){
 var Microee = require('microee');
 
 /* -------------------------------------------- */
@@ -951,7 +954,7 @@ module.exports = {
     ModelList: ModelList,
     Model: Model
 };
-},{"./lib/underscore-1.5.2.js":8,"microee":14}],14:[function(require,module,exports){
+},{"./lib/underscore-1.5.2.js":9,"microee":14}],14:[function(require,module,exports){
 function M() { this._events = {}; }
 M.prototype = {
   on: function(ev, cb) {

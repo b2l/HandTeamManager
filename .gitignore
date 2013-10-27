@@ -1,2 +1,5 @@
 node_modules
 test/*/compiled.js
+srv/data/*
+
+.idea/

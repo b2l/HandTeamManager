@@ -82,7 +82,10 @@ var App = {
         var xhr = new XHR();
         var stratView = new StrategieView('#content');
         xhr.get('/combis').success(function(data) {
-            stratView.setModel(JSON.parse(data));
+            if (data.length > 0)
+                stratView.setModel(JSON.parse(data));
+            else
+                stratView.setModel();
         }).send();
         this.currentView = stratView;
     }
