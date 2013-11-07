@@ -1,0 +1,25 @@
+$header: sprite-map('header/*.png');
+$logoUrl: sprite-file($header, 'bsc-logo');
+$headerHeight: image-height($logoUrl);
+$headerBorderBottom: 0;
+
+.header {
+  background: sprite($header, 'bsc-logo') no-repeat;
+  height: $headerHeight;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+
+  color: $color1;
+
+  border-bottom: $headerBorderBottom solid $color2;
+
+  h1 {
+    text-align: left;
+    margin-left: image-width($logoUrl) + 20;
+    font-size: image-height($logoUrl) - 20;
+  }
+
+}

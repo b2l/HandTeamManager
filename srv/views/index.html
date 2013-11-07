@@ -2,7 +2,6 @@
 <html>
 <head>
     <title>Hand Strategie</title>
-    <link rel="stylesheet" href="/public/css/bootstrap.min.css" />
     <link rel="stylesheet" href="/public/css/app.css" />
     <meta charset="UTF-8">
 </head>
@@ -16,7 +15,9 @@
 <!-- START TEMPLATES -->
 
 <script type="text/x-template" id="app-template">
-    <h1>Hand Strategie</h1>
+    <div class="header">
+        <h1>Hand Strategie</h1>
+    </div>
 
     <!--<nav>-->
         <!--<li class="joueurs">Joueurs</li>-->
@@ -24,7 +25,7 @@
         <!--<li class="strategie">Strategie</li>-->
     <!--</nav>-->
 
-    <div id="content">
+    <div id="content" class="content">
     </div>
 </script>
 
@@ -60,7 +61,6 @@
         </ul>
     </div>
 </script>
-
 
 <script type="text/x-template" id="compo-template">
     <ul class="joueur-list">
@@ -111,17 +111,19 @@
 </script>
 
 <script type="text/x-template" id="strat-template">
-    <div class="btn-group">
-        <button class='btn record'>Record</button>
-        <button class='btn reset'>Reinitialiser</button>
+    <div class="toolbar">
+        <div class="btn-group">
+            <button class='btn record'>Record</button>
+            <button class='btn reset'>Reinitialiser</button>
+        </div>
     </div>
 
-    <div class="save-box" style="display: none;">
+    <div class="save-box form height0">
         <input type="text" name="name" placeholder="Nom de la combinaison"/>
         <button class="save">Save</button>
     </div>
 
-    <ul>
+    <ul class="combi-list">
         <% _.each(combis, function(combi) { %>
             <li class="combi" data-combi-id="<%= combi._id %>"><%= combi.name %></li>
         <% }) %>

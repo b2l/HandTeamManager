@@ -1,96 +1,277 @@
-h1 {
-    height: 100px;
-    text-indent: 120px;
-    background: url(../img/bsc.jpg) no-repeat;
-}
-
-.joueur-list {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    width: 250px;
-    border-left: 1px solid #e5e5e5;
-    border-right: 1px solid #e5e5e5;
-    float: left;
-}
-
-.joueur-list .joueur {
-    line-height: 1.2em;
-    border-bottom: 1px solid #e5e5e5;
-}
-.joueur-list .joueur:hover {
-    background: #e5e5e5;
-}
-
-.selection-list, .joueur-info {
-    margin-left: 250px;
-    padding: 10px;
-}
-
-nav {
-    border-bottom: 1px solid #e5e5e5;
-}
-nav li {
-    margin: 0 -5px 0 0;
-
-    display: inline-block;
-    padding: 0 20px;
-    border: 1px solid #e5e5e5;
-    border-bottom: none;
-    border-radius: 5px 5px 0 0;
-}
-
-nav li.active {
-    background: #e5e5e5;
-}
-
-.editable:after {
-    content: "edit";
-    background: #e5e5e5;
-    font-size: 60%;
-    border: 1px solid #ececec;
-}
-
-.joueur:hover {
-    cursor: pointer;
-}
-
-.joueur.selected {
-    background: #ccc;
-}
-
-.joueur.selected:hover {
-    background: #ccc;
-}
-
+/* line 1, ../../assets/scss/_hand.scss */
 canvas {
-    float: left;
-    margin-left: 300px;
-    background-color: #202020;
+  float: left;
+  margin-left: 300px;
+  background-color: #202020;
 }
 
-.selection-list {
-    display: table;
+/**
+ * Base LAYOUT
+ */
+/* line 17, ../../assets/scss/app.scss */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
 }
 
-table {
-    border-collapse: collapse;
-    empty-cells: show;
+/**
+ * Typo
+ */
+/* line 27, ../../assets/scss/app.scss */
+html {
+  font-size: 13px;
+  font-family: Arial, Verdana, sans-serif;
 }
 
-table td {
-    vertical-align: top;
-    border: 1px solid #e5e5e5;
+/* line 32, ../../assets/scss/app.scss */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  padding: 0;
+  font-size: 100%;
 }
 
-.poste ul {
-    font-size: .8em;
-    min-width: 200px;
-    padding: 0;
-    list-style-type: none;
-    margin: 0 0 10px;
+/* line 38, ../../assets/scss/app.scss */
+h1 {
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
 }
 
-.nb-joueur {
-    font-size: .8em;
+/* line 44, ../../assets/scss/app.scss */
+h2 {
+  font-size: 16px;
+  font-weight: bold;
+  text-align: left;
+}
+
+/* line 50, ../../assets/scss/app.scss */
+h3 {
+  font-size: 14px;
+  font-weight: normal;
+  text-align: center;
+}
+
+/* line 56, ../../assets/scss/app.scss */
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+/* line 61, ../../assets/scss/app.scss */
+li {
+  color: #333;
+  font-size: 14px;
+  list-style-type: none;
+  line-height: 18px;
+}
+
+/* line 68, ../../assets/scss/app.scss */
+a {
+  color: #e9e9e9;
+  text-decoration: none;
+}
+
+/* line 73, ../../assets/scss/app.scss */
+input {
+  background: white;
+  border: 1px solid #3e3e3e;
+  padding: 4px 5px;
+}
+
+/**
+ * TOOLS
+ */
+/* line 83, ../../assets/scss/app.scss */
+.float-right {
+  float: right;
+}
+
+/* line 87, ../../assets/scss/app.scss */
+.btn {
+  cursor: pointer;
+  display: inline-block;
+  padding: 2px 8px;
+  margin: 0;
+  width: auto;
+  text-align: center;
+  color: #333;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+  font-weight: normal;
+  line-height: 20px;
+  border: 1px solid #8D8D8D;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  -ms-border-radius: 0;
+  -o-border-radius: 0;
+  border-radius: 0;
+  -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+  -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+  background: #e6e6e6;
+}
+/* line 108, ../../assets/scss/app.scss */
+.btn.small {
+  font-size: 12px;
+  line-height: 16px;
+}
+/* line 116, ../../assets/scss/app.scss */
+.btn:hover {
+  background: #c3c1c1;
+  background-position: 0 -15px;
+  color: #333;
+  text-decoration: none;
+}
+/* line 123, ../../assets/scss/app.scss */
+.btn.active {
+  background: #c3c1c1;
+  background-position: 0 -15px;
+  color: #333;
+  text-decoration: none;
+}
+
+/* line 6, ../../assets/scss/_header.scss */
+.header {
+  background: url('../img/header-s6680651eed.png') 0 0 no-repeat;
+  height: 100px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  color: #3e3e3e;
+  border-bottom: 0 solid #333333;
+}
+/* line 19, ../../assets/scss/_header.scss */
+.header h1 {
+  text-align: left;
+  margin-left: 120px;
+  font-size: 80px;
+}
+
+/* line 4, ../../assets/scss/_footer.scss */
+.footer {
+  position: fixed;
+  bottom: 0;
+  height: 0;
+  left: 0;
+  right: 0;
+  border-top: 0 solid #333333;
+  text-align: center;
+  color: white;
+  background: #3e3e3e;
+}
+
+/* line 5, ../../assets/scss/_content.scss */
+.content {
+  position: fixed;
+  top: 100px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: #8e8e8e;
+}
+
+/* line 16, ../../assets/scss/_content.scss */
+#top-wrapper {
+  position: fixed;
+  top: 100px;
+  right: 0;
+  left: 0;
+  height: 120px;
+  z-index: 1;
+}
+
+/* line 25, ../../assets/scss/_content.scss */
+.toolbar {
+  padding: 10px;
+  background: #333333;
+  color: white;
+}
+/* line 30, ../../assets/scss/_content.scss */
+.toolbar li {
+  display: inline-block;
+}
+
+/* line 35, ../../assets/scss/_content.scss */
+.form {
+  display: block;
+  padding: 10px;
+  height: auto;
+  background: white;
+  -webkit-transition: all 0.3s;
+  -moz-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+/* line 43, ../../assets/scss/_content.scss */
+.form.height0 {
+  height: 0px;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* line 50, ../../assets/scss/_content.scss */
+.combi-list {
+  width: 200px;
+  float: left;
+  margin-top: 10px;
+}
+/* line 55, ../../assets/scss/_content.scss */
+.combi-list .combi {
+  padding-left: 10px;
+  border-bottom: 1px solid #e9e9e9;
+  line-height: 20px;
+  font-size: 15px;
+  color: #3e3e3e;
+}
+/* line 62, ../../assets/scss/_content.scss */
+.combi-list .combi:hover {
+  background: #e9e9e9;
+  color: #333333;
+  font-weight: bold;
+}
+
+/* line 70, ../../assets/scss/_content.scss */
+.btn-group {
+  display: inline-block;
+  overflow: hidden;
+}
+/* line 74, ../../assets/scss/_content.scss */
+.btn-group .btn {
+  margin-right: 0;
+  margin-left: 0;
+  float: left;
+  border-right-width: 0;
+}
+/* line 80, ../../assets/scss/_content.scss */
+.btn-group .btn:last-child {
+  border-right-width: 1px;
+}
+
+/* line 86, ../../assets/scss/_content.scss */
+.remove-combi {
+  display: inline-block;
+}
+
+/* line 90, ../../assets/scss/_content.scss */
+.btn-delete {
+  width: 20px;
+  height: 20px;
+  position: relative;
+}
+/* line 98, ../../assets/scss/_content.scss */
+.btn-delete:after {
+  content: "";
+  position: absolute;
+  background: url('../img/icone-s5c856e1c21.png') 0 0 no-repeat;
+  top: 2px;
+  right: 8px;
+  bottom: 2px;
+  left: 8px;
+}
+/* line 110, ../../assets/scss/_content.scss */
+.btn-delete:hover:after {
+  background: url('../img/icone-s5c856e1c21.png') 0 -20px no-repeat;
 }

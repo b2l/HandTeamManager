@@ -1,7 +1,8 @@
 module.exports = function (grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.loadNpmTasks('grunt-browserify');
+    grunt.loadNpmTasks('grunt-browserify2');
+    grunt.loadNpmTasks('grunt-contrib-compass');
 
     // Project configuration.
     grunt.initConfig({
@@ -9,19 +10,35 @@ module.exports = function (grunt) {
         /* DEV MODE - auto compile & test */
         'watch': {
             'src': {
-                files: ['assets/**/*.js'],
-                tasks: ['browserify']
+                files: ['assets/**/*'],
+                tasks: ['buildAssets']
             }
         },
 
-        browserify: {
-            'dist': {
-                files: {
-                    'public/js/app.js': [__dirname + '/assets/src/app.js']
+        browserify2: {
+            dev: {
+                entry: './assets/src/app.js',
+                compile: './public/js/app.js',
+                debug: false
+            }
+        },
+
+        compass: {
+            dev: {
+                options: {
+                    environment: 'development',
+                    outputStyle: 'expanded',
+                    imagesDir: './assets/images',
+                    generatedImagesDir: './public/img',
+                    relativeAssets: true,
+                    sassDir: './assets/scss',
+                    cssDir: './public/css'
                 }
             }
         }
     });
 
-    grunt.registerTask('default', ['browserify', 'watch']);
+    grunt.registerTask('default', ['buildAssets', 'watch']);
+
+    grunt.registerTask('buildAssets', ['browserify2', 'compass:dev']);
 };

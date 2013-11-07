@@ -20,7 +20,7 @@ app.post('/combis', function(req, res) {
 });
 
 app.delete('/combis/:id', function(req, res) {
-    appController.delete(req, res);
+    appController.deleteCombi(req, res);
 });
 
 var port = process.env.PORT || 3000

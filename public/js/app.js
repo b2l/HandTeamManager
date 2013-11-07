@@ -94,7 +94,7 @@ var App = {
 };
 
 App.init();
-},{"./views/app":2,"./views/joueur":3,"./models/joueurs":4,"./views/composition":5,"./views/strategie":6,"./lib/xhr":7}],2:[function(require,module,exports){
+},{"./views/app":2,"./models/joueurs":3,"./views/joueur":4,"./views/composition":5,"./views/strategie":6,"./lib/xhr":7}],2:[function(require,module,exports){
 var View = require('../View.js');
 var _ = require('../lib/underscore-1.5.2.js');
 
@@ -113,7 +113,7 @@ AppView.prototype._render = function() {
 
 module.exports = AppView;
 
-},{"../View.js":8,"../lib/underscore-1.5.2.js":9}],3:[function(require,module,exports){
+},{"../View.js":8,"../lib/underscore-1.5.2.js":9}],4:[function(require,module,exports){
 var View = require('../View.js');
 var Joueur = require('../models/joueur.js');
 var _ = require('../lib/underscore-1.5.2.js');
@@ -362,7 +362,7 @@ XHR.prototype = {
 };
 
 module.exports = XHR;
-},{"./underscore-1.5.2.js":9}],4:[function(require,module,exports){
+},{"./underscore-1.5.2.js":9}],3:[function(require,module,exports){
 var ModelList = require('../Model').ModelList;
 var Joueur = require('./joueur');
 
@@ -435,7 +435,8 @@ function StrategieView(selector) {
         'click': {
             '.record': this.record,
             '.save': this.saveCombi,
-            '.combi': this.play
+            '.combi': this.play,
+            '.btn-delete': this.removeCombi
         }
     };
 }
@@ -526,8 +527,9 @@ StrategieView.prototype.record = function() {
 
     if (!this.recording) {
         sessionStorage.setItem('combi', JSON.stringify(this.combi));
-        this.renderSaveBox();
     } else {
+        document.querySelector(this.$el + ' .record').classList.add('disabled');
+        this.renderSaveBox();
         sessionStorage.removeItem('combi');
     }
 };
@@ -536,9 +538,32 @@ StrategieView.prototype.play = function(e) {
     this.terrain.placePlayers();
     this.terrain.placeDefence('1-5');
 
+    var combiId = e.target.getAttribute('data-combi-id');
     this.combi = this.combis.filter(function(combi) {
-        return combi._id === e.target.getAttribute('data-combi-id');
+        return combi._id === combiId;
     })[0].combi.slice(0);
+
+    var oldSelectedCombi = document.querySelector('.combi.selected');
+    if (oldSelectedCombi) {
+        oldSelectedCombi.classList.remove('selected');
+    }
+    e.target.classList.add('selected');
+
+    /* Add a remove button for the selected combi */
+    var wrapper = document.createElement('span');
+    wrapper.setAttribute('id', 'remove-combi');
+    wrapper.classList.add('remove-combi');
+    wrapper.classList.add('btn');
+    wrapper.classList.add('btn-delete');
+    wrapper.setAttribute('data-combi-id', combiId);
+
+    var oldRemoveBtn = document.getElementById('remove-combi');
+    if (oldRemoveBtn) {
+        oldRemoveBtn.parentNode.removeChild(oldRemoveBtn);
+    }
+
+    document.querySelector('.toolbar').appendChild(wrapper);
+
     this.playing = true;
 };
 
@@ -561,7 +586,7 @@ StrategieView.prototype._play = function() {
 };
 
 StrategieView.prototype.renderSaveBox = function renderSaveBox() {
-    document.querySelector(this.$el + ' .save-box').style.display = "block";
+    document.querySelector(this.$el + ' .save-box').classList.remove('height0');
 };
 
 StrategieView.prototype.saveCombi = function saveCombi(e) {
@@ -571,11 +596,24 @@ StrategieView.prototype.saveCombi = function saveCombi(e) {
         name: name,
         combi: this.combi
     };
+    var view = this;
     xhr.post('/combis').success(
         function(xhrData) {
-            console.log('Combi saved');
+            document.querySelector(view.$el + ' .save-box').classList.add('height0');
+            document.querySelector(view.$el + ' .record').classList.remove('disabled');
         }
     ).send(data);
+};
+
+StrategieView.prototype.removeCombi = function removeCombi(e) {
+    var combiId = e.target.getAttribute('data-combi-id');
+
+    var xhr = new XHR();
+    var view = this;
+    console.log('remove combi');
+    xhr.DELETE('/combis/' + combiId).success(function(data) {
+        console.log('combi removed');
+    }).send();
 };
 
 module.exports = StrategieView;
@@ -880,7 +918,7 @@ function renderTerrain(x, y, longueur, largeur) {
 module.exports = Terrain;
 
 
-},{"./underscore-1.5.2.js":9,"./paper-full.min.js":11}],10:[function(require,module,exports){
+},{"./paper-full.min.js":11,"./underscore-1.5.2.js":9}],10:[function(require,module,exports){
 var Model = require('../Model').Model;
 
 Joueur.prototype = new Model();

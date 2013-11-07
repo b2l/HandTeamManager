@@ -3,12 +3,11 @@ var ObjectID = require('mongodb').ObjectID;
 var EE = require('events').EventEmitter;
 
 var Events = new EE();
-
-var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || "mongodb://localhost:27017/hand";
+Events.setMaxListeners(0);
 
 var db = {
     connect: function() {
-        var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || "mongodb://localhost:27017/links";
+        var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || "mongodb://localhost:27017/hand";
 
         MongoClient.connect(mongoUri, function(err, db) {
             if (err) {
@@ -41,6 +40,22 @@ var db = {
                     Events.emit('db.err', err);
                 } else {
                     Events.emit('db.inserted', result[0]);
+                }
+            });
+
+            Events.removeListener('db.connected', callback);
+        });
+        this.connect();
+    },
+    remove: function(id, collection) {
+        Events.on("db.connected", function callback(db) {
+            var coll = db.collection(collection);
+            coll.remove({_id: ObjectID(id)}, function(err, result) {
+                if (err) {
+                    Events.emit('db.err', err);
+                } else {
+                    console.log('removed');
+                    Events.emit('db.removed');
                 }
             });
 
@@ -101,6 +116,19 @@ module.exports = {
     },
 
     deleteCombi: function(req, res) {
-        req.params.id
+        var combiId = req.params.id;
+
+        Events.on('db.removed', function onSuccess() {
+            Events.removeListener('db.inserted', onSuccess);
+            res.end();
+        });
+
+
+        Events.on("db.err", function onError(err) {
+            Events.removeListener('db.err', onError);
+            res.json(err);
+        });
+
+        db.remove(combiId, 'combis');
     }
 };

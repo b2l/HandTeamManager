@@ -20,7 +20,8 @@ function StrategieView(selector) {
         'click': {
             '.record': this.record,
             '.save': this.saveCombi,
-            '.combi': this.play
+            '.combi': this.play,
+            '.btn-delete': this.removeCombi
         }
     };
 }
@@ -111,8 +112,9 @@ StrategieView.prototype.record = function() {
 
     if (!this.recording) {
         sessionStorage.setItem('combi', JSON.stringify(this.combi));
-        this.renderSaveBox();
     } else {
+        document.querySelector(this.$el + ' .record').classList.add('disabled');
+        this.renderSaveBox();
         sessionStorage.removeItem('combi');
     }
 };
@@ -121,9 +123,32 @@ StrategieView.prototype.play = function(e) {
     this.terrain.placePlayers();
     this.terrain.placeDefence('1-5');
 
+    var combiId = e.target.getAttribute('data-combi-id');
     this.combi = this.combis.filter(function(combi) {
-        return combi._id === e.target.getAttribute('data-combi-id');
+        return combi._id === combiId;
     })[0].combi.slice(0);
+
+    var oldSelectedCombi = document.querySelector('.combi.selected');
+    if (oldSelectedCombi) {
+        oldSelectedCombi.classList.remove('selected');
+    }
+    e.target.classList.add('selected');
+
+    /* Add a remove button for the selected combi */
+    var wrapper = document.createElement('span');
+    wrapper.setAttribute('id', 'remove-combi');
+    wrapper.classList.add('remove-combi');
+    wrapper.classList.add('btn');
+    wrapper.classList.add('btn-delete');
+    wrapper.setAttribute('data-combi-id', combiId);
+
+    var oldRemoveBtn = document.getElementById('remove-combi');
+    if (oldRemoveBtn) {
+        oldRemoveBtn.parentNode.removeChild(oldRemoveBtn);
+    }
+
+    document.querySelector('.toolbar').appendChild(wrapper);
+
     this.playing = true;
 };
 
@@ -146,7 +171,7 @@ StrategieView.prototype._play = function() {
 };
 
 StrategieView.prototype.renderSaveBox = function renderSaveBox() {
-    document.querySelector(this.$el + ' .save-box').style.display = "block";
+    document.querySelector(this.$el + ' .save-box').classList.remove('height0');
 };
 
 StrategieView.prototype.saveCombi = function saveCombi(e) {
@@ -156,11 +181,24 @@ StrategieView.prototype.saveCombi = function saveCombi(e) {
         name: name,
         combi: this.combi
     };
+    var view = this;
     xhr.post('/combis').success(
         function(xhrData) {
-            console.log('Combi saved');
+            document.querySelector(view.$el + ' .save-box').classList.add('height0');
+            document.querySelector(view.$el + ' .record').classList.remove('disabled');
         }
     ).send(data);
+};
+
+StrategieView.prototype.removeCombi = function removeCombi(e) {
+    var combiId = e.target.getAttribute('data-combi-id');
+
+    var xhr = new XHR();
+    var view = this;
+    console.log('remove combi');
+    xhr.DELETE('/combis/' + combiId).success(function(data) {
+        console.log('combi removed');
+    }).send();
 };
 
 module.exports = StrategieView;
