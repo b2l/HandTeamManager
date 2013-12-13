@@ -1,35 +1,45 @@
 {
-    "name": "spatester",
-    "version": "1.0.0",
-    "description": "Single Page App tester",
-    "main": "src/testem-adapter.js",
-    "repository": {
-        "type": "git",
-        "url": "git://github.com:viareport/spatester.git"
-    },
-    "keywords": [
-        "test",
-        "framework",
-        "javascript",
-        "singlepageapp"
-    ],
-    "dependencies": {
-        "express": "3.x",
-        "microee": "~0.0.2",
-        "ejs" : "x",
-        "mongodb": "1.2.10",
-        "grunt": "~0.4.1",
-        "grunt-contrib-watch": "~0.5.3",
-        "grunt-browserify2": "0.1.8",
-        "grunt-contrib-compass": "0.6.0",
-        "node-persist": "0.0.1"
-    },
-    "engines": {
-        "node": ">=0.4.0"
-    },
-    "author": {
-        "name": "Nicolas Medda",
-        "email": "nmedda@viareport.com"
-    },
-    "license": "BSD"
+  "name": "spatester",
+  "version": "1.0.0",
+  "description": "Single Page App tester",
+  "main": "src/testem-adapter.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com:viareport/spatester.git"
+  },
+  "keywords": [
+    "test",
+    "framework",
+    "javascript",
+    "singlepageapp"
+  ],
+  "dependencies": {
+    "express": "3.x",
+    "microee": "~0.0.2",
+    "ejs": "x",
+    "mongodb": "1.2.10",
+    "node-persist": "0.0.1",
+    "passport": "~0.1.17",
+    "passport-google": "~0.3.0"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-mocha-test": "~0.7.0",
+    "chai": "~1.8.1",
+    "grunt-contrib-sass": "~0.5.1",
+    "grunt-express": "~1.2.1",
+    "grunt-nodemon": "~0.1.2",
+    "grunt-concurrent": "~0.4.2",
+    "grunt-browserify2": "~0.1.8",
+    "grunt-contrib-uglify": "~0.2.7"
+  },
+  "engines": {
+    "node": ">=0.4.0"
+  },
+  "author": {
+    "name": "Nicolas Medda",
+    "email": "nmedda@viareport.com"
+  },
+  "license": "BSD"
 }

@@ -66,6 +66,13 @@ var db = {
 };
 
 module.exports = {
+    showLoginForm: function(req, res) {
+        res.sendfile( __dirname + '/../views/login.html', {root: '/'});
+    },
+    login: function(req, res) {
+        res.redirect('/');
+    },
+
     index: function(req, res) {
         res.sendfile( __dirname + '/../views/index.html', {root: '/'});
     },

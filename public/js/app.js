@@ -617,7 +617,7 @@ StrategieView.prototype.removeCombi = function removeCombi(e) {
 };
 
 module.exports = StrategieView;
-},{"../View.js":8,"../lib/underscore-1.5.2.js":9,"../lib/paper-full.min.js":11,"../lib/paperjs-tool.js":12,"../lib/xhr":7}],9:[function(require,module,exports){
+},{"../lib/paper-full.min.js":11,"../View.js":8,"../lib/paperjs-tool.js":12,"../lib/underscore-1.5.2.js":9,"../lib/xhr":7}],9:[function(require,module,exports){
 (function(){//     Underscore.js 1.5.2
 //     http://underscorejs.org
 //     (c) 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
