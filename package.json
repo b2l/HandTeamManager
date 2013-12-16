@@ -20,7 +20,8 @@
     "mongodb": "1.2.10",
     "node-persist": "0.0.1",
     "passport": "~0.1.17",
-    "passport-google": "~0.3.0"
+    "passport-google": "~0.3.0",
+    "passport-twitter": "~1.0.2"
   },
   "devDependencies": {
     "grunt": "~0.4.2",

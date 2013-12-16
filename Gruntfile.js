@@ -63,19 +63,22 @@ module.exports = function (grunt) {
         sass: {
             prod: {
                 options: {
-                    style: 'compressed'
+                    style: 'compressed',
+                    compass: true
                 },
                 files: {
-                    'public/css/main.css': 'assets/sass/main.scss'
+                    'public/css/main.css': 'assets/scss/main.scss'
                 }
             },
             dev: {
                 options: {
                     style: 'expanded',
-                    debug: true
+                    debug: true,
+                    compass: true,
+                    loadPath: ['./assets/images', './assets/js']
                 },
                 files: {
-                    'public/css/app.css': 'assets/sass/app.scss'
+                    'public/css/app.css': 'assets/scss/app.scss'
                 }
             }
         },

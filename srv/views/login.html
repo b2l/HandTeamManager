@@ -9,12 +9,27 @@
 
 <div id="app-wrapper">
 
-    Logged in with google:
+    <div class="header">
+        <h1>Hand Strategie</h1>
+    </div>
 
-    <form action="/auth/google">
-        <input type="submit" value="Google"/>
-    </form>
 
+    <div id="content" class="content">
+        <div class="signin">
+            <h1>Sign in</h1>
+
+            <div class="google">
+                <a id="customBtn" href="/auth/google/">
+                    <span class="icon"></span>
+                    <span class="buttonText">Google</span>
+                </a>
+            </div>
+
+            <div class="twitter">
+                <a id="twitter" href="/auth/twitter">Sign in with twitter</a>
+            </div>
+        </div>
+    </div>
 </div>
 
 </body>

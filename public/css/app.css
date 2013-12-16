@@ -1,14 +1,86 @@
-/* line 1, ../../assets/scss/_hand.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_hand\.scss}line{font-family:\000031}}
 canvas {
   float: left;
   margin-left: 300px;
   background-color: #202020;
 }
 
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_google-signin\.scss}line{font-family:\000033}}
+.signin {
+  width: 300px;
+  margin: auto;
+  padding: 20px;
+  background: white;
+  margin-top: 60px;
+  text-align: center;
+  -webkit-box-shadow: 0 0 15px 5px #333333;
+  -moz-box-shadow: 0 0 15px 5px #333333;
+  box-shadow: 0 0 15px 5px #333333;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_google-signin\.scss}line{font-family:\0000313}}
+.google, .twitter {
+  margin: 10px auto;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_google-signin\.scss}line{font-family:\0000317}}
+#customBtn {
+  display: inline-block;
+  background: #dd4b39;
+  color: white;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_google-signin\.scss}line{font-family:\0000325}}
+#customBtn:hover {
+  background: #e74b37;
+  cursor: hand;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_google-signin\.scss}line{font-family:\0000330}}
+span.label {
+  font-weight: bold;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_google-signin\.scss}line{font-family:\0000334}}
+span.icon {
+  background: url("https://google-developers.appspot.com/+/images/branding/btn_red_32.png") transparent 5px 50% no-repeat;
+  display: inline-block;
+  vertical-align: middle;
+  width: 35px;
+  height: 35px;
+  border-right: #bb3f30 1px solid;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_google-signin\.scss}line{font-family:\0000343}}
+span.buttonText {
+  display: inline-block;
+  vertical-align: middle;
+  padding-left: 35px;
+  padding-right: 35px;
+  font-size: 14px;
+  font-weight: bold;
+  /* Use the Roboto font that is loaded in the <head> */
+  font-family: 'Roboto', arial, sans-serif;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_google-signin\.scss}line{font-family:\0000354}}
+#twitter {
+  display: inline-block;
+  background: url(https://dev.twitter.com/sites/default/files/images_documentation/sign-in-with-twitter-gray.png) center center;
+  width: 158px;
+  height: 0;
+  padding-top: 28px;
+  text-indent: 90000px;
+  overflow: hidden;
+  text-align: left;
+}
+
 /**
  * Base LAYOUT
  */
-/* line 17, ../../assets/scss/app.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/app\.scss}line{font-family:\0000314}}
 html, body {
   margin: 0;
   padding: 0;
@@ -19,47 +91,47 @@ html, body {
 /**
  * Typo
  */
-/* line 27, ../../assets/scss/app.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/app\.scss}line{font-family:\0000324}}
 html {
   font-size: 13px;
   font-family: Arial, Verdana, sans-serif;
 }
 
-/* line 32, ../../assets/scss/app.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/app\.scss}line{font-family:\0000329}}
 h1, h2, h3, h4, h5, h6 {
   margin: 0;
   padding: 0;
   font-size: 100%;
 }
 
-/* line 38, ../../assets/scss/app.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/app\.scss}line{font-family:\0000335}}
 h1 {
   font-size: 18px;
   font-weight: bold;
   text-align: center;
 }
 
-/* line 44, ../../assets/scss/app.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/app\.scss}line{font-family:\0000341}}
 h2 {
   font-size: 16px;
   font-weight: bold;
   text-align: left;
 }
 
-/* line 50, ../../assets/scss/app.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/app\.scss}line{font-family:\0000347}}
 h3 {
   font-size: 14px;
   font-weight: normal;
   text-align: center;
 }
 
-/* line 56, ../../assets/scss/app.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/app\.scss}line{font-family:\0000353}}
 ul {
   margin: 0;
   padding: 0;
 }
 
-/* line 61, ../../assets/scss/app.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/app\.scss}line{font-family:\0000358}}
 li {
   color: #333;
   font-size: 14px;
@@ -67,13 +139,13 @@ li {
   line-height: 18px;
 }
 
-/* line 68, ../../assets/scss/app.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/app\.scss}line{font-family:\0000365}}
 a {
   color: #e9e9e9;
   text-decoration: none;
 }
 
-/* line 73, ../../assets/scss/app.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/app\.scss}line{font-family:\0000370}}
 input {
   background: white;
   border: 1px solid #3e3e3e;
@@ -83,12 +155,12 @@ input {
 /**
  * TOOLS
  */
-/* line 83, ../../assets/scss/app.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/app\.scss}line{font-family:\0000380}}
 .float-right {
   float: right;
 }
 
-/* line 87, ../../assets/scss/app.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/app\.scss}line{font-family:\0000384}}
 .btn {
   cursor: pointer;
   display: inline-block;
@@ -112,19 +184,19 @@ input {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
   background: #e6e6e6;
 }
-/* line 108, ../../assets/scss/app.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/app\.scss}line{font-family:\00003105}}
 .btn.small {
   font-size: 12px;
   line-height: 16px;
 }
-/* line 116, ../../assets/scss/app.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/app\.scss}line{font-family:\00003113}}
 .btn:hover {
   background: #c3c1c1;
   background-position: 0 -15px;
   color: #333;
   text-decoration: none;
 }
-/* line 123, ../../assets/scss/app.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/app\.scss}line{font-family:\00003120}}
 .btn.active {
   background: #c3c1c1;
   background-position: 0 -15px;
@@ -132,7 +204,7 @@ input {
   text-decoration: none;
 }
 
-/* line 6, ../../assets/scss/_header.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_header\.scss}line{font-family:\000036}}
 .header {
   background: url('../img/header-s6680651eed.png') 0 0 no-repeat;
   height: 100px;
@@ -143,14 +215,14 @@ input {
   color: #3e3e3e;
   border-bottom: 0 solid #333333;
 }
-/* line 19, ../../assets/scss/_header.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_header\.scss}line{font-family:\0000319}}
 .header h1 {
   text-align: left;
   margin-left: 120px;
   font-size: 80px;
 }
 
-/* line 4, ../../assets/scss/_footer.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_footer\.scss}line{font-family:\000034}}
 .footer {
   position: fixed;
   bottom: 0;
@@ -163,7 +235,7 @@ input {
   background: #3e3e3e;
 }
 
-/* line 5, ../../assets/scss/_content.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_content\.scss}line{font-family:\000035}}
 .content {
   position: fixed;
   top: 100px;
@@ -173,7 +245,7 @@ input {
   background: #8e8e8e;
 }
 
-/* line 16, ../../assets/scss/_content.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_content\.scss}line{font-family:\0000316}}
 #top-wrapper {
   position: fixed;
   top: 100px;
@@ -183,18 +255,18 @@ input {
   z-index: 1;
 }
 
-/* line 25, ../../assets/scss/_content.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_content\.scss}line{font-family:\0000325}}
 .toolbar {
   padding: 10px;
   background: #333333;
   color: white;
 }
-/* line 30, ../../assets/scss/_content.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_content\.scss}line{font-family:\0000330}}
 .toolbar li {
   display: inline-block;
 }
 
-/* line 35, ../../assets/scss/_content.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_content\.scss}line{font-family:\0000335}}
 .form {
   display: block;
   padding: 10px;
@@ -205,20 +277,20 @@ input {
   -o-transition: all 0.3s;
   transition: all 0.3s;
 }
-/* line 43, ../../assets/scss/_content.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_content\.scss}line{font-family:\0000343}}
 .form.height0 {
   height: 0px;
   padding: 0;
   overflow: hidden;
 }
 
-/* line 50, ../../assets/scss/_content.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_content\.scss}line{font-family:\0000350}}
 .combi-list {
   width: 200px;
   float: left;
   margin-top: 10px;
 }
-/* line 55, ../../assets/scss/_content.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_content\.scss}line{font-family:\0000355}}
 .combi-list .combi {
   padding-left: 10px;
   border-bottom: 1px solid #e9e9e9;
@@ -226,42 +298,42 @@ input {
   font-size: 15px;
   color: #3e3e3e;
 }
-/* line 62, ../../assets/scss/_content.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_content\.scss}line{font-family:\0000362}}
 .combi-list .combi:hover {
   background: #e9e9e9;
   color: #333333;
   font-weight: bold;
 }
 
-/* line 70, ../../assets/scss/_content.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_content\.scss}line{font-family:\0000370}}
 .btn-group {
   display: inline-block;
   overflow: hidden;
 }
-/* line 74, ../../assets/scss/_content.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_content\.scss}line{font-family:\0000374}}
 .btn-group .btn {
   margin-right: 0;
   margin-left: 0;
   float: left;
   border-right-width: 0;
 }
-/* line 80, ../../assets/scss/_content.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_content\.scss}line{font-family:\0000380}}
 .btn-group .btn:last-child {
   border-right-width: 1px;
 }
 
-/* line 86, ../../assets/scss/_content.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_content\.scss}line{font-family:\0000386}}
 .remove-combi {
   display: inline-block;
 }
 
-/* line 90, ../../assets/scss/_content.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_content\.scss}line{font-family:\0000390}}
 .btn-delete {
   width: 20px;
   height: 20px;
   position: relative;
 }
-/* line 98, ../../assets/scss/_content.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_content\.scss}line{font-family:\0000398}}
 .btn-delete:after {
   content: "";
   position: absolute;
@@ -271,7 +343,7 @@ input {
   bottom: 2px;
   left: 8px;
 }
-/* line 110, ../../assets/scss/_content.scss */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/b2l\/project\/HandTeamManager\/assets\/scss\/_content\.scss}line{font-family:\00003110}}
 .btn-delete:hover:after {
   background: url('../img/icone-s5c856e1c21.png') 0 -20px no-repeat;
 }
