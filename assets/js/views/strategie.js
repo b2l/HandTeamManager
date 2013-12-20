@@ -21,7 +21,8 @@ function StrategieView(selector) {
             '.record': this.record,
             '.save': this.saveCombi,
             '.combi': this.play,
-            '.btn-delete': this.removeCombi
+            '.btn-delete': this.removeCombi,
+            '.btn.reset': this.resetPosition
         }
     };
 }
@@ -54,6 +55,12 @@ StrategieView.prototype._render = function() {
     this.tool.onMouseUp = this.paperOnMouseUp.bind(this);
 
     this.paper.view.onFrame = this.paperOnFrame.bind(this);
+};
+
+StrategieView.prototype.resetPosition = function () {
+    this.terrain.placePlayers();
+    this.terrain.placeDefence('1-5');
+    this.terrain.placeBall();
 };
 
 StrategieView.prototype.paperOnMouseDown = function(e) {

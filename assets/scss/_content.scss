@@ -38,7 +38,7 @@ $icone: sprite-map('icone/*.png');
   height: auto;
 
   background: white;
-  @include transition(all 0.3s);
+  @include transition(all 0.5s);
 
   &.height0 {
     height: 0px;

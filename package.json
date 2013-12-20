@@ -1,17 +1,16 @@
 {
-  "name": "spatester",
-  "version": "1.0.0",
-  "description": "Single Page App tester",
-  "main": "src/testem-adapter.js",
+  "name": "HandTeamManager",
+  "version": "0.0.5",
+  "description": "Manager team strategie, and make them available to the team members",
+  "main": "src/app.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com:viareport/spatester.git"
+    "url": "git://github.com:b2l/HandTeamManager.git"
   },
   "keywords": [
-    "test",
-    "framework",
-    "javascript",
-    "singlepageapp"
+    "Handball",
+    "Team",
+    "website"
   ],
   "dependencies": {
     "express": "3.x",
@@ -21,7 +20,9 @@
     "node-persist": "0.0.1",
     "passport": "~0.1.17",
     "passport-google": "~0.3.0",
-    "passport-twitter": "~1.0.2"
+    "passport-twitter": "~1.0.2",
+    "q-mongodb": "0.0.1",
+    "q": "~0.9.7"
   },
   "devDependencies": {
     "grunt": "~0.4.2",
@@ -33,7 +34,8 @@
     "grunt-nodemon": "~0.1.2",
     "grunt-concurrent": "~0.4.2",
     "grunt-browserify2": "~0.1.8",
-    "grunt-contrib-uglify": "~0.2.7"
+    "grunt-contrib-uglify": "~0.2.7",
+    "page": "~1.3.7"
   },
   "engines": {
     "node": ">=0.4.0"

@@ -15,7 +15,8 @@ passport.use(
         realm: 'http://localhost:3000'
     }, function(identifier, profile, done) {
         profile.identifier = identifier;
-        return done(null, profile)
+        var user = createOrGetUserFromGoogle(profile);
+        return done(null, user)
     })
 );
 passport.use(
@@ -24,7 +25,8 @@ passport.use(
         consumerSecret: "OQzV7AhPoHaPPbfk6J25sJEzWcEezq92MEXi05XQqvw",
         callbackURL: "http://localhost:3000/auth/twitter/return"
     },function(token, tokenSecret, profile, done) {
-        done(null, profile);
+        var user = createOrGetUserFromTwitter(profile);
+        done(null, user);
     })
 );
 
@@ -33,6 +35,9 @@ var express = require('express');
 var app = express();
 
 /** MIDDLEWARE */
+// Data as json
+app.use(express.json());
+app.use(express.urlencoded());
 // Gzip
 app.use(express.compress());
 // Method override
@@ -48,12 +53,25 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 var controller = require('./controllers/app');
+var policies = require('./policies');
 
 /** ROUTES */
-app.get('/', ensureAuthenticated, controller.index);
-app.get('/combis', ensureAuthenticated, controller.allCombi);
-app.post('/combis', ensureAuthenticated, controller.saveCombi);
-app.del('/combis/:id', ensureAuthenticated, controller.deleteCombi);
+app.get('/', policies.isAuthenticated, controller.index);
+app.get('/combis', policies.isAuthenticated, controller.allCombi);
+app.post('/combis', policies.isAuthenticated, controller.saveCombi);
+app.del('/combis/:id', policies.isAuthenticated, controller.deleteCombi);
+
+app.get('/users', [policies.isAuthenticated, policies.isAdmin], function(req, res) {
+    UsersDAO.getAll().then(function(users) {
+        res.json(users);
+    }).fail(function(reason) {
+        res.json(reason);
+    });
+});
+
+app.post('/users', [policies.isAuthenticated, policies.isAdmin], function(req, res) {
+    console.log(req.body);
+});
 
 app.get('/login', controller.showLoginForm);
 
@@ -76,9 +94,27 @@ app.get('/logout', function(req, res){
     res.redirect('/');
 });
 
-app.listen(process.env.PORT || 3000);
+/** A dégager dans un service de login, pour créer le profile adapter a la volé */
+var UsersDAO = require('./DAO/users');
+function createOrGetUserFromGoogle(profile) {
+    var user = {
+        login: profile.emails[0].value,
+        firstName: profile.name.givenName,
+        lastName: profile.name.familyName
+    };
 
-function ensureAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) { return next(); }
-    res.redirect('/login')
+    UsersDAO.save(user);
+    return user;
 }
+function createOrGetUserFromTwitter(profile) {
+    var user = {
+        login: profile.username,
+        firstName: profile.displayName.split(' ')[0],
+        lastName: profile.displayName.split(' ')[1]
+    };
+
+    UsersDAO.save(user);
+    return user;
+}
+
+app.listen(process.env.PORT || 3000);

@@ -19,7 +19,11 @@ Terrain.prototype.draw = function() {
 
     this.placePlayers();
 
-    this.getItemByName('ball').position = this.getItemByName('t1DC').position.subtract(new Paper.Point(15, 0));
+    this.placeBall();
+};
+
+Terrain.prototype.placeBall = function () {
+    this.getItemByName('ball').position = this.getItemByName('t1DC').position.subtract(new Paper.Point(15, 0))
 };
 
 Terrain.prototype.placePlayers = function() {

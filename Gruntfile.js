@@ -12,7 +12,7 @@ module.exports = function (grunt) {
             },
             sass: {
                 files: 'assets/scss/**/*.scss',
-                tasks: ['sass']
+                tasks: ['sass:' + environment]
             },
             browserify: {
                 files: 'assets/js/**/*.js',
@@ -67,7 +67,7 @@ module.exports = function (grunt) {
                     compass: true
                 },
                 files: {
-                    'public/css/main.css': 'assets/scss/main.scss'
+                    'public/css/app.css': 'assets/scss/app.scss'
                 }
             },
             dev: {

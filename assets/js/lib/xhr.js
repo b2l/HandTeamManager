@@ -12,6 +12,12 @@ function XHR() {
     this.data = null;
 }
 XHR.prototype = {
+
+    header: function(key, value) {
+        this.header[key] = value;
+        return this;
+    },
+
     post: function(url, params) {
         this._xhr.open('POST', url);
         this.data = params;
@@ -55,6 +61,10 @@ XHR.prototype = {
                 }
             }
         };
+
+        for (var header in this.header) {
+            this._xhr.setRequestHeader(header, this.header[header]);
+        }
 
         this._xhr.send(this.serialize(this.data));
     },

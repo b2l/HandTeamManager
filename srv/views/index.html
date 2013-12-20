@@ -11,103 +11,56 @@
 
 </body>
 
-<script type="text/javascript" src="/public/js/bootstrap.min.js"></script>
 <!-- START TEMPLATES -->
 
 <script type="text/x-template" id="app-template">
     <div class="header">
         <h1>Hand Strategie</h1>
+        <nav>
+            <li><a class="Users" href="/_users">Users</a></li>
+            <li><a class="compo" href="/_combis">Combinaisons</a></li>
+        </nav>
     </div>
-
-    <!--<nav>-->
-        <!--<li class="joueurs">Joueurs</li>-->
-        <!--<li class="compo">Composition d'équipe</li>-->
-        <!--<li class="strategie">Strategie</li>-->
-    <!--</nav>-->
 
     <div id="content" class="content">
     </div>
 </script>
 
-<script type="text/x-template" id="joueurs-template">
-    <ul class="joueur-list">
-        <li class="add-joueur">Ajouter un joueur</li>
+<script type="text/x-template" id="users-template">
+    <div class="toolbar">
+        <div class="btn-group">
+            <button class='btn add'>Ajouter</button>
+            <button class='btn delete'>Supprimer</button>
+        </div>
+    </div>
 
-        <% _.each(joueurs.models, function(joueur) { %>
-        <li class="joueur" data-attr-id="<%= joueur.id %>">
-            <%= joueur.firstname %>
-            <%= joueur.lastname %>
-        </li>
-        <% }); %>
+    <form class="add-form form height0">
+        <div>
+            <label for="login">Login</label>
+            <input id="login" type="text" name="login"/>
+        </div>
+
+        <div>
+            <label for="passwd">Password</label>
+            <input id="passwd" type="password" name="password" />
+        </div>
+
+        <div>
+            <label for="passwd-confirm">Confirm password</label>
+            <input id="passwd-comfirm" type="password" name="password-confirm"/>
+        </div>
+
+        <div>
+            <input type="submit" value="Sauver" />
+            <input type="reset" value="Annuler" class="cancel"/>
+        </div>
+    </form>
+
+    <ul>
+        <% _.each(_users, function(user) { %>
+            <li><a class="user" href="/users/<%= user._id %>"><%= user.login %></a></li>
+        <% }) %>
     </ul>
-    <div class="joueur-info"></div>
-</script>
-
-<script type="text/x-tempalte" id="joueur-info-template">
-    <h3>Joueur</h3>
-    <div class="editable" data-property-name="firstname">
-        <%= joueur.firstname ? joueur.firstname : "Prénom" %>
-    </div>
-    <div class="editable" data-property-name="lastname">
-        <%= joueur.lastname ? joueur.lastname : "Nom" %>
-    </div>
-
-    <div class="roles">
-        <h3>Postes</h3>
-        <ul>
-            <% _.each(joueur.postes, function(poste) { %>
-            <li class="role"><%= poste %></li>
-            <% }); %>
-        </ul>
-    </div>
-</script>
-
-<script type="text/x-template" id="compo-template">
-    <ul class="joueur-list">
-        <li class="add-joueur">Ajouter un joueur</li>
-
-        <% _.each(joueurs.models, function(joueur) { %>
-        <li class="joueur" data-attr-id="<%= joueur.id %>">
-            <%= joueur.firstname %>
-            <%= joueur.lastname %>
-        </li>
-        <% }); %>
-    </ul>
-
-    <div class="selection-list"></div>
-</script>
-
-<script type="text/x-template" id="selection-template">
-    <table>
-        <tr>
-            <% _.each(postes, function(poste) { %>
-            <td><%= poste.label %></td>
-            <% }) %>
-        </tr>
-        <tr class="poste">
-            <% _.each(postes, function(poste) { %>
-
-            <td class='poste-joueurs'>
-                <ul>
-                    <% _.each(poste.joueurs, function(joueur) { %>
-                    <li>
-                        <%= joueur.firstname %>
-                        <%= joueur.lastname %>
-                    </li>
-                    <% }) %>
-                </ul>
-            </td>
-            <% }) %>
-        </tr>
-        <tr>
-            <% _.each(postes, function(poste) { %>
-            <td class="nb-joueur"><%= poste.joueurs.length %> joueurs </td>
-            <% }) %>
-        </tr>
-    </table>
-    <div class="total-nb-joueur">
-        <%= nbJoueur %> joueurs
-    </div>
 </script>
 
 <script type="text/x-template" id="strat-template">

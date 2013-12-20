@@ -1,100 +1,4 @@
 ;(function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({1:[function(require,module,exports){
-var AppView= require('./views/app');
-var Joueurs = require('./models/joueurs');
-var JoueurView = require('./views/joueur');
-var CompositionView = require('./views/composition');
-var StrategieView = require('./views/strategie');
-var XHR = require('./lib/xhr');
-
-function startEdit(e) {
-
-    var value = e.target.innerHTML;
-    var property = e.target.getAttribute('data-property-name');
-    var tpl = "<input class='editing' type='text' name='" + property + "' value='" + value + "'/>";
-    e.target.setAttribute('data-old-value', value);
-    e.target.innerHTML = tpl;
-}
-function editKeyListener(e) {
-    if (e.keyCode === 13) {
-        var property = e.target.getAttribute('name');
-        var oldValue = e.target.parentNode.getAttribute('data-old-value');
-        var newValue = e.target.value;
-        var event = new CustomEvent('edited', {bubbles: true, 'detail': {property: property, oldValue: oldValue, newValue: newValue}})
-        e.target.dispatchEvent(event);
-
-        _endEdit(e.target);
-    }
-    else if (e.keyCode === 27) {
-        e.target.value = e.target.parentNode.getAttribute('data-old-value');
-        _endEdit(e.target);
-    }
-}
-function _endEdit(element) {
-    element.parentNode.innerHTML = element.value;
-}
-Gator(document).on('click', '.editable', startEdit);
-Gator(document).on('keydown', '.editable .editing', editKeyListener);
-
-var App = {
-    currentView: null,
-    _goto: function(routes) {
-
-        if (App[routes]) {
-            if (this.currentView) {
-                this.currentView.destroy.call(this.currentView);
-            }
-
-            App[routes].call(this);
-        }
-    },
-    init: function() {
-        var appView = new AppView('#app-wrapper');
-//        appView.events = {
-//            'click': {
-//                'li.joueurs': function () {
-//                    this._goto('joueurs');
-//                }.bind(this),
-//                'li.compo': function () {
-//                    this._goto('compo');
-//                }.bind(this),
-//                'li.strategie': function () {
-//                    this._goto('strat');
-//                }.bind(this)
-//            }
-//        };
-        appView.render();
-
-        this._goto('strat');
-    },
-    joueurs: function () {
-        var joueurs = new Joueurs();
-        joueurs.load();
-        var joueurView = new JoueurView(joueurs, '#content');
-        joueurView.render();
-        this.currentView = joueurView;
-    },
-    compo: function() {
-        var joueurs = new Joueurs();
-        joueurs.load();
-        var compoView = new CompositionView(joueurs, '#content');
-        compoView.render();
-        this.currentView = compoView;
-    },
-    strat: function() {
-        var xhr = new XHR();
-        var stratView = new StrategieView('#content');
-        xhr.get('/combis').success(function(data) {
-            if (data.length > 0)
-                stratView.setModel(JSON.parse(data));
-            else
-                stratView.setModel();
-        }).send();
-        this.currentView = stratView;
-    }
-};
-
-App.init();
-},{"./views/app":2,"./models/joueurs":3,"./views/joueur":4,"./views/composition":5,"./views/strategie":6,"./lib/xhr":7}],2:[function(require,module,exports){
 var View = require('../View.js');
 var _ = require('../lib/underscore-1.5.2.js');
 
@@ -113,213 +17,73 @@ AppView.prototype._render = function() {
 
 module.exports = AppView;
 
-},{"../View.js":8,"../lib/underscore-1.5.2.js":9}],4:[function(require,module,exports){
-var View = require('../View.js');
-var Joueur = require('../models/joueur.js');
+},{"../View.js":2,"../lib/underscore-1.5.2.js":3}],4:[function(require,module,exports){
 var _ = require('../lib/underscore-1.5.2.js');
 
-JoueurView.prototype = new View();
-JoueurView.constructor = JoueurView;
-function JoueurView(model, selector) {
-    this.model = model;
-    this.currentJoueur = null;
-    this.$el = selector;
+function UsersView(element, modelPromise) {
+    this.$el = document.querySelector(element);
+    this.preRender();
 
-    this.events = {
-        'click': {
-            '.joueur': this.displayJoueurInfo,
-            '.add-joueur': this.showAddJoueurForm
-        },
-        'submit': {
-            '.add-joueur-form': this.addJoueur
-        },
-        'edited': {
-            'input': this.updateJoueurInfo
-        }
+    modelPromise.then(function(users) {
+        this.model = users;
+        this.render();
+    }.bind(this));
+}
+
+UsersView.prototype.preRender = function() {
+    this.$el.innerHTML = "Loading data...";
+};
+
+UsersView.prototype.destroy = function() {
+    this.unbind();
+    this.$el = null;
+    this.model = null;
+}
+
+UsersView.prototype.render = function() {
+    var tplContent = document.getElementById('users-template').innerHTML;
+    var tpl = _.template(tplContent);
+    this.$el.innerHTML = tpl({_users: this.model.models});
+    this.bindEvents();
+};
+
+UsersView.prototype.displayAddUserForm = function () {
+    this.$el.querySelector('.add-form').classList.remove('height0');
+};
+UsersView.prototype.hideAddUserForm = function() {
+    this.$el.querySelector('.add-form').classList.add('height0');
+};
+
+/* DOM EVENT HANDLER */
+UsersView.prototype.bindEvents = function () {
+    Gator(this.$el).on('click', '.add', this.showAddHandler.bind(this));
+    Gator(this.$el).on('click', '.add-form .cancel', this.cancelAddHandler.bind(this));
+    Gator(this.$el).on('submit', '.add-form', this.addUserHandler.bind(this));
+};
+UsersView.prototype.unbind = function() {
+    Gator(this.$el).off();
+};
+
+UsersView.prototype.showAddHandler = function(e) {
+    this.displayAddUserForm();
+};
+
+UsersView.prototype.cancelAddHandler = function(e) {
+    this.hideAddUserForm();
+};
+
+UsersView.prototype.addUserHandler = function(e) {
+    e.preventDefault();
+    var user = {
+        login: e.target.querySelector('[name="login"]').value,
+        password: e.target.querySelector('[name="password"]').value
     };
-
-    this.model.on('change', this.render.bind(this));
-}
-
-JoueurView.prototype._render = function() {
-    var tpl = document.getElementById('joueurs-template').innerHTML;
-    var html = _.template(tpl)({joueurs: this.model});
-    document.querySelector(this.$el).innerHTML = html;
+    this.model.add(user);
 };
 
-function _displayJoueurInfo(joueur) {
-    this.currentJoueur = joueur;
-    var tpl = document.getElementById('joueur-info-template').innerHTML;
-    var html = _.template(tpl)({joueur: joueur});
-    document.querySelector(this.$el + " .joueur-info").innerHTML = html;
-}
-JoueurView.prototype.displayJoueurInfo = function(e) {
-    var joueurId = e.target.getAttribute('data-attr-id');
-    var joueur = this.model.getById(joueurId);
-    _displayJoueurInfo.call(this, joueur);
-};
+module.exports = UsersView;
 
-JoueurView.prototype.showAddJoueurForm = function(e) {
-    var joueur = new Joueur();
-    _displayJoueurInfo.call(this, joueur);
-};
-
-JoueurView.prototype.updateJoueurInfo = function updateJoueurInfo(e) {
-    var prop = e.detail.property;
-    this.currentJoueur[prop] = e.detail.newValue;
-    this.currentJoueur.save();
-};
-
-JoueurView.prototype.addJoueur = function(e) {
-};
-
-module.exports = JoueurView;
-
-},{"../View.js":8,"../models/joueur.js":10,"../lib/underscore-1.5.2.js":9}],5:[function(require,module,exports){
-var View = require('../View.js');
-var _ = require('../lib/underscore-1.5.2.js');
-var Paper = require('../lib/paper-full.min.js').exports;
-var PaperTool = require('../lib/paperjs-tool.js');
-
-CompositionView.prototype = new View();
-CompositionView.constructor = CompositionView;
-function CompositionView(models, selector) {
-    this.models = models;
-    this.$el = selector;
-
-    this.events = {
-        'click': {
-            '.joueur': this.toggleSelect
-        }
-    }
-}
-
-CompositionView.prototype.toggleSelect = function(e) {
-    e.target.classList.toggle('selected');
-    var joueurId = e.target.getAttribute('data-attr-id');
-    var joueur = this.models.getById(joueurId);
-
-    joueur.selected = e.target.classList.contains('selected');
-
-    this.renderCompo();
-};
-
-CompositionView.prototype._render = function() {
-    var tpl = _.template(document.getElementById('compo-template').innerHTML);
-    var html = tpl({joueurs: this.models});
-    document.querySelector(this.$el).innerHTML = html;
-};
-
-CompositionView.prototype.renderCompo = function() {
-    var postes = {
-        'G': {
-            label: "Gardien",
-            joueurs: [
-            ]
-        },
-        'AiG': {
-            label: "Ailier Gauche",
-            joueurs: [
-            ]
-        },
-        'AiD': {
-            label: "Ailier Droit",
-            joueurs: [
-            ]
-        },
-        'PV': {
-            label: "Pivot",
-            joueurs: [
-            ]
-        },
-        'AG': {
-            label: "Arrière Gauche",
-            joueurs: [
-            ]
-        },
-        'AD': {
-            label: "Arrière Droite",
-            joueurs: [
-            ]
-        },
-        'DC': {
-            label: "Demi-centre",
-            joueurs: [
-            ]
-        }
-    };
-
-    var nbJoueur = 0;
-    this.models.models.map(function(j) {
-        if (j.selected) {
-            nbJoueur++;
-            _.each(j.postes, function(poste) {
-                postes[poste].joueurs.push(j);
-            });
-        }
-    });
-
-
-    var tpl = _.template(document.getElementById('selection-template').innerHTML);
-    var html = tpl({
-        postes: postes,
-        nbJoueur: nbJoueur
-    });
-    document.querySelector(this.$el + " .selection-list").innerHTML = html;
-};
-
-module.exports = CompositionView;
-},{"../View.js":8,"../lib/underscore-1.5.2.js":9,"../lib/paper-full.min.js":11,"../lib/paperjs-tool.js":12}],3:[function(require,module,exports){
-var ModelList = require('../Model').ModelList;
-var Joueur = require('./joueur');
-
-Joueurs.prototype = new ModelList();
-Joueurs.constructor = Joueurs;
-function Joueurs() {}
-
-Joueurs.prototype.load = function() {
-    this.models = [];
-    joueurs.forEach(function(joueur) {
-        var j = new Joueur({
-            id: joueur.id,
-            firstname: joueur.firstname,
-            lastname: joueur.lastname,
-            postes: joueur.postes
-        });
-        this.add(j)
-        j.on('saved', this.changed.bind(this));
-    }, this);
-};
-Joueurs.prototype.changed = function() {
-    console.log('changed');
-    this.emit('change');
-}
-
-var joueurs = [
-    { id: 0, firstname: "Jean-Luc", lastname: "Rouyet", postes: ['AD', 'AiD'] },
-    { id: 1, firstname: "Louison", lastname: "ONIMUS", postes: ['AG', 'AiG'] },
-    { id: 2, firstname: "Matthieux", lastname: "LAHEUX", postes: ['AG', 'DC', 'AD'] },
-    { id: 3, firstname: "Julien", lastname: "FREMONT", postes: ['DC'] },
-    { id: 4, firstname: "Xaymana", lastname: "Maokhamphiou", postes: ['PV', 'DC'] },
-    { id: 5, firstname: "Daniel", lastname: "SANCHEZ", postes: ['G'] },
-    { id: 6, firstname: "Emilien", lastname: "YVRARD", postes: ['PV'] },
-    { id: 7, firstname: "Ronan", lastname: "LAVIGNE", postes: ['AiD'] },
-    { id: 8, firstname: "Jean-Marc", lastname: "WAEYTENS", postes: ['G'] },
-    { id: 9, firstname: "Benjamin", lastname: "DARRENOUGUE", postes: ['AG', 'AD', 'AiG'] },
-    { id: 10, firstname: "Jérome", lastname: "DOMANGE", postes: ['AG', 'DC', 'AD'] },
-    { id: 11, firstname: "Christophe", lastname: "GENOT", postes: ['PV', 'AiG'] },
-    { id: 12, firstname: "Franck", lastname: "PERPIGNAN", postes: ['AiG'] },
-    { id: 13, firstname: "Camille", lastname: "DOMINIQUE", postes: ['AiG'] },
-    { id: 14, firstname: "Yannick", lastname: "BADIE", postes: ['AiG', 'AiD'] },
-    { id: 15, firstname: "Mickael", lastname: "EDMOND", postes: ['AiG', 'PV', 'AiD'] },
-    { id: 16, firstname: "Sylvain", lastname: "CAMPAGNE", postes: ['AG', 'DC', 'AD'] },
-    { id: 17, firstname: "Jean", lastname: "UNG", postes: ['AG', 'DC', 'AD'] },
-];
-
-module.exports = Joueurs;
-
-
-},{"../Model":13,"./joueur":10}],7:[function(require,module,exports){
+},{"../lib/underscore-1.5.2.js":3}],5:[function(require,module,exports){
 var _ = require('./underscore-1.5.2.js');
 
 function XHR() {
@@ -334,6 +98,12 @@ function XHR() {
     this.data = null;
 }
 XHR.prototype = {
+
+    header: function(key, value) {
+        this.header[key] = value;
+        return this;
+    },
+
     post: function(url, params) {
         this._xhr.open('POST', url);
         this.data = params;
@@ -378,6 +148,10 @@ XHR.prototype = {
             }
         };
 
+        for (var header in this.header) {
+            this._xhr.setRequestHeader(header, this.header[header]);
+        }
+
         this._xhr.send(this.serialize(this.data));
     },
 
@@ -412,7 +186,7 @@ XHR.prototype = {
 };
 
 module.exports = XHR;
-},{"./underscore-1.5.2.js":9}],6:[function(require,module,exports){
+},{"./underscore-1.5.2.js":3}],6:[function(require,module,exports){
 var View = require('../View.js');
 var _ = require('../lib/underscore-1.5.2.js');
 var Paper = require('../lib/paper-full.min.js').exports;
@@ -436,7 +210,8 @@ function StrategieView(selector) {
             '.record': this.record,
             '.save': this.saveCombi,
             '.combi': this.play,
-            '.btn-delete': this.removeCombi
+            '.btn-delete': this.removeCombi,
+            '.btn.reset': this.resetPosition
         }
     };
 }
@@ -469,6 +244,12 @@ StrategieView.prototype._render = function() {
     this.tool.onMouseUp = this.paperOnMouseUp.bind(this);
 
     this.paper.view.onFrame = this.paperOnFrame.bind(this);
+};
+
+StrategieView.prototype.resetPosition = function () {
+    this.terrain.placePlayers();
+    this.terrain.placeDefence('1-5');
+    this.terrain.placeBall();
 };
 
 StrategieView.prototype.paperOnMouseDown = function(e) {
@@ -617,7 +398,7 @@ StrategieView.prototype.removeCombi = function removeCombi(e) {
 };
 
 module.exports = StrategieView;
-},{"../View.js":8,"../lib/underscore-1.5.2.js":9,"../lib/paper-full.min.js":11,"../lib/paperjs-tool.js":12,"../lib/xhr":7}],9:[function(require,module,exports){
+},{"../View.js":2,"../lib/underscore-1.5.2.js":3,"../lib/paper-full.min.js":7,"../lib/paperjs-tool.js":8,"../lib/xhr":5}],3:[function(require,module,exports){
 (function(){//     Underscore.js 1.5.2
 //     http://underscorejs.org
 //     (c) 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -625,7 +406,7 @@ module.exports = StrategieView;
 (function(){var n=this,t=n._,r={},e=Array.prototype,u=Object.prototype,i=Function.prototype,a=e.push,o=e.slice,c=e.concat,l=u.toString,f=u.hasOwnProperty,s=e.forEach,p=e.map,h=e.reduce,v=e.reduceRight,g=e.filter,d=e.every,m=e.some,y=e.indexOf,b=e.lastIndexOf,x=Array.isArray,w=Object.keys,_=i.bind,j=function(n){return n instanceof j?n:this instanceof j?(this._wrapped=n,void 0):new j(n)};"undefined"!=typeof exports?("undefined"!=typeof module&&module.exports&&(exports=module.exports=j),exports._=j):n._=j,j.VERSION="1.5.2";var A=j.each=j.forEach=function(n,t,e){if(null!=n)if(s&&n.forEach===s)n.forEach(t,e);else if(n.length===+n.length){for(var u=0,i=n.length;i>u;u++)if(t.call(e,n[u],u,n)===r)return}else for(var a=j.keys(n),u=0,i=a.length;i>u;u++)if(t.call(e,n[a[u]],a[u],n)===r)return};j.map=j.collect=function(n,t,r){var e=[];return null==n?e:p&&n.map===p?n.map(t,r):(A(n,function(n,u,i){e.push(t.call(r,n,u,i))}),e)};var E="Reduce of empty array with no initial value";j.reduce=j.foldl=j.inject=function(n,t,r,e){var u=arguments.length>2;if(null==n&&(n=[]),h&&n.reduce===h)return e&&(t=j.bind(t,e)),u?n.reduce(t,r):n.reduce(t);if(A(n,function(n,i,a){u?r=t.call(e,r,n,i,a):(r=n,u=!0)}),!u)throw new TypeError(E);return r},j.reduceRight=j.foldr=function(n,t,r,e){var u=arguments.length>2;if(null==n&&(n=[]),v&&n.reduceRight===v)return e&&(t=j.bind(t,e)),u?n.reduceRight(t,r):n.reduceRight(t);var i=n.length;if(i!==+i){var a=j.keys(n);i=a.length}if(A(n,function(o,c,l){c=a?a[--i]:--i,u?r=t.call(e,r,n[c],c,l):(r=n[c],u=!0)}),!u)throw new TypeError(E);return r},j.find=j.detect=function(n,t,r){var e;return O(n,function(n,u,i){return t.call(r,n,u,i)?(e=n,!0):void 0}),e},j.filter=j.select=function(n,t,r){var e=[];return null==n?e:g&&n.filter===g?n.filter(t,r):(A(n,function(n,u,i){t.call(r,n,u,i)&&e.push(n)}),e)},j.reject=function(n,t,r){return j.filter(n,function(n,e,u){return!t.call(r,n,e,u)},r)},j.every=j.all=function(n,t,e){t||(t=j.identity);var u=!0;return null==n?u:d&&n.every===d?n.every(t,e):(A(n,function(n,i,a){return(u=u&&t.call(e,n,i,a))?void 0:r}),!!u)};var O=j.some=j.any=function(n,t,e){t||(t=j.identity);var u=!1;return null==n?u:m&&n.some===m?n.some(t,e):(A(n,function(n,i,a){return u||(u=t.call(e,n,i,a))?r:void 0}),!!u)};j.contains=j.include=function(n,t){return null==n?!1:y&&n.indexOf===y?n.indexOf(t)!=-1:O(n,function(n){return n===t})},j.invoke=function(n,t){var r=o.call(arguments,2),e=j.isFunction(t);return j.map(n,function(n){return(e?t:n[t]).apply(n,r)})},j.pluck=function(n,t){return j.map(n,function(n){return n[t]})},j.where=function(n,t,r){return j.isEmpty(t)?r?void 0:[]:j[r?"find":"filter"](n,function(n){for(var r in t)if(t[r]!==n[r])return!1;return!0})},j.findWhere=function(n,t){return j.where(n,t,!0)},j.max=function(n,t,r){if(!t&&j.isArray(n)&&n[0]===+n[0]&&n.length<65535)return Math.max.apply(Math,n);if(!t&&j.isEmpty(n))return-1/0;var e={computed:-1/0,value:-1/0};return A(n,function(n,u,i){var a=t?t.call(r,n,u,i):n;a>e.computed&&(e={value:n,computed:a})}),e.value},j.min=function(n,t,r){if(!t&&j.isArray(n)&&n[0]===+n[0]&&n.length<65535)return Math.min.apply(Math,n);if(!t&&j.isEmpty(n))return 1/0;var e={computed:1/0,value:1/0};return A(n,function(n,u,i){var a=t?t.call(r,n,u,i):n;a<e.computed&&(e={value:n,computed:a})}),e.value},j.shuffle=function(n){var t,r=0,e=[];return A(n,function(n){t=j.random(r++),e[r-1]=e[t],e[t]=n}),e},j.sample=function(n,t,r){return arguments.length<2||r?n[j.random(n.length-1)]:j.shuffle(n).slice(0,Math.max(0,t))};var k=function(n){return j.isFunction(n)?n:function(t){return t[n]}};j.sortBy=function(n,t,r){var e=k(t);return j.pluck(j.map(n,function(n,t,u){return{value:n,index:t,criteria:e.call(r,n,t,u)}}).sort(function(n,t){var r=n.criteria,e=t.criteria;if(r!==e){if(r>e||r===void 0)return 1;if(e>r||e===void 0)return-1}return n.index-t.index}),"value")};var F=function(n){return function(t,r,e){var u={},i=null==r?j.identity:k(r);return A(t,function(r,a){var o=i.call(e,r,a,t);n(u,o,r)}),u}};j.groupBy=F(function(n,t,r){(j.has(n,t)?n[t]:n[t]=[]).push(r)}),j.indexBy=F(function(n,t,r){n[t]=r}),j.countBy=F(function(n,t){j.has(n,t)?n[t]++:n[t]=1}),j.sortedIndex=function(n,t,r,e){r=null==r?j.identity:k(r);for(var u=r.call(e,t),i=0,a=n.length;a>i;){var o=i+a>>>1;r.call(e,n[o])<u?i=o+1:a=o}return i},j.toArray=function(n){return n?j.isArray(n)?o.call(n):n.length===+n.length?j.map(n,j.identity):j.values(n):[]},j.size=function(n){return null==n?0:n.length===+n.length?n.length:j.keys(n).length},j.first=j.head=j.take=function(n,t,r){return null==n?void 0:null==t||r?n[0]:o.call(n,0,t)},j.initial=function(n,t,r){return o.call(n,0,n.length-(null==t||r?1:t))},j.last=function(n,t,r){return null==n?void 0:null==t||r?n[n.length-1]:o.call(n,Math.max(n.length-t,0))},j.rest=j.tail=j.drop=function(n,t,r){return o.call(n,null==t||r?1:t)},j.compact=function(n){return j.filter(n,j.identity)};var M=function(n,t,r){return t&&j.every(n,j.isArray)?c.apply(r,n):(A(n,function(n){j.isArray(n)||j.isArguments(n)?t?a.apply(r,n):M(n,t,r):r.push(n)}),r)};j.flatten=function(n,t){return M(n,t,[])},j.without=function(n){return j.difference(n,o.call(arguments,1))},j.uniq=j.unique=function(n,t,r,e){j.isFunction(t)&&(e=r,r=t,t=!1);var u=r?j.map(n,r,e):n,i=[],a=[];return A(u,function(r,e){(t?e&&a[a.length-1]===r:j.contains(a,r))||(a.push(r),i.push(n[e]))}),i},j.union=function(){return j.uniq(j.flatten(arguments,!0))},j.intersection=function(n){var t=o.call(arguments,1);return j.filter(j.uniq(n),function(n){return j.every(t,function(t){return j.indexOf(t,n)>=0})})},j.difference=function(n){var t=c.apply(e,o.call(arguments,1));return j.filter(n,function(n){return!j.contains(t,n)})},j.zip=function(){for(var n=j.max(j.pluck(arguments,"length").concat(0)),t=new Array(n),r=0;n>r;r++)t[r]=j.pluck(arguments,""+r);return t},j.object=function(n,t){if(null==n)return{};for(var r={},e=0,u=n.length;u>e;e++)t?r[n[e]]=t[e]:r[n[e][0]]=n[e][1];return r},j.indexOf=function(n,t,r){if(null==n)return-1;var e=0,u=n.length;if(r){if("number"!=typeof r)return e=j.sortedIndex(n,t),n[e]===t?e:-1;e=0>r?Math.max(0,u+r):r}if(y&&n.indexOf===y)return n.indexOf(t,r);for(;u>e;e++)if(n[e]===t)return e;return-1},j.lastIndexOf=function(n,t,r){if(null==n)return-1;var e=null!=r;if(b&&n.lastIndexOf===b)return e?n.lastIndexOf(t,r):n.lastIndexOf(t);for(var u=e?r:n.length;u--;)if(n[u]===t)return u;return-1},j.range=function(n,t,r){arguments.length<=1&&(t=n||0,n=0),r=arguments[2]||1;for(var e=Math.max(Math.ceil((t-n)/r),0),u=0,i=new Array(e);e>u;)i[u++]=n,n+=r;return i};var R=function(){};j.bind=function(n,t){var r,e;if(_&&n.bind===_)return _.apply(n,o.call(arguments,1));if(!j.isFunction(n))throw new TypeError;return r=o.call(arguments,2),e=function(){if(!(this instanceof e))return n.apply(t,r.concat(o.call(arguments)));R.prototype=n.prototype;var u=new R;R.prototype=null;var i=n.apply(u,r.concat(o.call(arguments)));return Object(i)===i?i:u}},j.partial=function(n){var t=o.call(arguments,1);return function(){return n.apply(this,t.concat(o.call(arguments)))}},j.bindAll=function(n){var t=o.call(arguments,1);if(0===t.length)throw new Error("bindAll must be passed function names");return A(t,function(t){n[t]=j.bind(n[t],n)}),n},j.memoize=function(n,t){var r={};return t||(t=j.identity),function(){var e=t.apply(this,arguments);return j.has(r,e)?r[e]:r[e]=n.apply(this,arguments)}},j.delay=function(n,t){var r=o.call(arguments,2);return setTimeout(function(){return n.apply(null,r)},t)},j.defer=function(n){return j.delay.apply(j,[n,1].concat(o.call(arguments,1)))},j.throttle=function(n,t,r){var e,u,i,a=null,o=0;r||(r={});var c=function(){o=r.leading===!1?0:new Date,a=null,i=n.apply(e,u)};return function(){var l=new Date;o||r.leading!==!1||(o=l);var f=t-(l-o);return e=this,u=arguments,0>=f?(clearTimeout(a),a=null,o=l,i=n.apply(e,u)):a||r.trailing===!1||(a=setTimeout(c,f)),i}},j.debounce=function(n,t,r){var e,u,i,a,o;return function(){i=this,u=arguments,a=new Date;var c=function(){var l=new Date-a;t>l?e=setTimeout(c,t-l):(e=null,r||(o=n.apply(i,u)))},l=r&&!e;return e||(e=setTimeout(c,t)),l&&(o=n.apply(i,u)),o}},j.once=function(n){var t,r=!1;return function(){return r?t:(r=!0,t=n.apply(this,arguments),n=null,t)}},j.wrap=function(n,t){return function(){var r=[n];return a.apply(r,arguments),t.apply(this,r)}},j.compose=function(){var n=arguments;return function(){for(var t=arguments,r=n.length-1;r>=0;r--)t=[n[r].apply(this,t)];return t[0]}},j.after=function(n,t){return function(){return--n<1?t.apply(this,arguments):void 0}},j.keys=w||function(n){if(n!==Object(n))throw new TypeError("Invalid object");var t=[];for(var r in n)j.has(n,r)&&t.push(r);return t},j.values=function(n){for(var t=j.keys(n),r=t.length,e=new Array(r),u=0;r>u;u++)e[u]=n[t[u]];return e},j.pairs=function(n){for(var t=j.keys(n),r=t.length,e=new Array(r),u=0;r>u;u++)e[u]=[t[u],n[t[u]]];return e},j.invert=function(n){for(var t={},r=j.keys(n),e=0,u=r.length;u>e;e++)t[n[r[e]]]=r[e];return t},j.functions=j.methods=function(n){var t=[];for(var r in n)j.isFunction(n[r])&&t.push(r);return t.sort()},j.extend=function(n){return A(o.call(arguments,1),function(t){if(t)for(var r in t)n[r]=t[r]}),n},j.pick=function(n){var t={},r=c.apply(e,o.call(arguments,1));return A(r,function(r){r in n&&(t[r]=n[r])}),t},j.omit=function(n){var t={},r=c.apply(e,o.call(arguments,1));for(var u in n)j.contains(r,u)||(t[u]=n[u]);return t},j.defaults=function(n){return A(o.call(arguments,1),function(t){if(t)for(var r in t)n[r]===void 0&&(n[r]=t[r])}),n},j.clone=function(n){return j.isObject(n)?j.isArray(n)?n.slice():j.extend({},n):n},j.tap=function(n,t){return t(n),n};var S=function(n,t,r,e){if(n===t)return 0!==n||1/n==1/t;if(null==n||null==t)return n===t;n instanceof j&&(n=n._wrapped),t instanceof j&&(t=t._wrapped);var u=l.call(n);if(u!=l.call(t))return!1;switch(u){case"[object String]":return n==String(t);case"[object Number]":return n!=+n?t!=+t:0==n?1/n==1/t:n==+t;case"[object Date]":case"[object Boolean]":return+n==+t;case"[object RegExp]":return n.source==t.source&&n.global==t.global&&n.multiline==t.multiline&&n.ignoreCase==t.ignoreCase}if("object"!=typeof n||"object"!=typeof t)return!1;for(var i=r.length;i--;)if(r[i]==n)return e[i]==t;var a=n.constructor,o=t.constructor;if(a!==o&&!(j.isFunction(a)&&a instanceof a&&j.isFunction(o)&&o instanceof o))return!1;r.push(n),e.push(t);var c=0,f=!0;if("[object Array]"==u){if(c=n.length,f=c==t.length)for(;c--&&(f=S(n[c],t[c],r,e)););}else{for(var s in n)if(j.has(n,s)&&(c++,!(f=j.has(t,s)&&S(n[s],t[s],r,e))))break;if(f){for(s in t)if(j.has(t,s)&&!c--)break;f=!c}}return r.pop(),e.pop(),f};j.isEqual=function(n,t){return S(n,t,[],[])},j.isEmpty=function(n){if(null==n)return!0;if(j.isArray(n)||j.isString(n))return 0===n.length;for(var t in n)if(j.has(n,t))return!1;return!0},j.isElement=function(n){return!(!n||1!==n.nodeType)},j.isArray=x||function(n){return"[object Array]"==l.call(n)},j.isObject=function(n){return n===Object(n)},A(["Arguments","Function","String","Number","Date","RegExp"],function(n){j["is"+n]=function(t){return l.call(t)=="[object "+n+"]"}}),j.isArguments(arguments)||(j.isArguments=function(n){return!(!n||!j.has(n,"callee"))}),"function"!=typeof/./&&(j.isFunction=function(n){return"function"==typeof n}),j.isFinite=function(n){return isFinite(n)&&!isNaN(parseFloat(n))},j.isNaN=function(n){return j.isNumber(n)&&n!=+n},j.isBoolean=function(n){return n===!0||n===!1||"[object Boolean]"==l.call(n)},j.isNull=function(n){return null===n},j.isUndefined=function(n){return n===void 0},j.has=function(n,t){return f.call(n,t)},j.noConflict=function(){return n._=t,this},j.identity=function(n){return n},j.times=function(n,t,r){for(var e=Array(Math.max(0,n)),u=0;n>u;u++)e[u]=t.call(r,u);return e},j.random=function(n,t){return null==t&&(t=n,n=0),n+Math.floor(Math.random()*(t-n+1))};var I={escape:{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#x27;"}};I.unescape=j.invert(I.escape);var T={escape:new RegExp("["+j.keys(I.escape).join("")+"]","g"),unescape:new RegExp("("+j.keys(I.unescape).join("|")+")","g")};j.each(["escape","unescape"],function(n){j[n]=function(t){return null==t?"":(""+t).replace(T[n],function(t){return I[n][t]})}}),j.result=function(n,t){if(null==n)return void 0;var r=n[t];return j.isFunction(r)?r.call(n):r},j.mixin=function(n){A(j.functions(n),function(t){var r=j[t]=n[t];j.prototype[t]=function(){var n=[this._wrapped];return a.apply(n,arguments),z.call(this,r.apply(j,n))}})};var N=0;j.uniqueId=function(n){var t=++N+"";return n?n+t:t},j.templateSettings={evaluate:/<%([\s\S]+?)%>/g,interpolate:/<%=([\s\S]+?)%>/g,escape:/<%-([\s\S]+?)%>/g};var q=/(.)^/,B={"'":"'","\\":"\\","\r":"r","\n":"n","	":"t","\u2028":"u2028","\u2029":"u2029"},D=/\\|'|\r|\n|\t|\u2028|\u2029/g;j.template=function(n,t,r){var e;r=j.defaults({},r,j.templateSettings);var u=new RegExp([(r.escape||q).source,(r.interpolate||q).source,(r.evaluate||q).source].join("|")+"|$","g"),i=0,a="__p+='";n.replace(u,function(t,r,e,u,o){return a+=n.slice(i,o).replace(D,function(n){return"\\"+B[n]}),r&&(a+="'+\n((__t=("+r+"))==null?'':_.escape(__t))+\n'"),e&&(a+="'+\n((__t=("+e+"))==null?'':__t)+\n'"),u&&(a+="';\n"+u+"\n__p+='"),i=o+t.length,t}),a+="';\n",r.variable||(a="with(obj||{}){\n"+a+"}\n"),a="var __t,__p='',__j=Array.prototype.join,"+"print=function(){__p+=__j.call(arguments,'');};\n"+a+"return __p;\n";try{e=new Function(r.variable||"obj","_",a)}catch(o){throw o.source=a,o}if(t)return e(t,j);var c=function(n){return e.call(this,n,j)};return c.source="function("+(r.variable||"obj")+"){\n"+a+"}",c},j.chain=function(n){return j(n).chain()};var z=function(n){return this._chain?j(n).chain():n};j.mixin(j),A(["pop","push","reverse","shift","sort","splice","unshift"],function(n){var t=e[n];j.prototype[n]=function(){var r=this._wrapped;return t.apply(r,arguments),"shift"!=n&&"splice"!=n||0!==r.length||delete r[0],z.call(this,r)}}),A(["concat","join","slice"],function(n){var t=e[n];j.prototype[n]=function(){return z.call(this,t.apply(this._wrapped,arguments))}}),j.extend(j.prototype,{chain:function(){return this._chain=!0,this},value:function(){return this._wrapped}})}).call(this);
 //# sourceMappingURL=underscore-min.map
 })()
-},{}],11:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 (function(){/*!
  * Paper.js v0.9.9 - The Swiss Army Knife of Vector Graphics Scripting.
  * http://paperjs.org/
@@ -664,7 +445,501 @@ if("boolean"==typeof u){n=h,i=u;var c=a.add(n).divide(2),r=c.add(c.subtract(a).r
 },stop:function(t){q.stopPropagation(t),q.preventDefault(t)}};q.requestAnimationFrame=new function(){var t="equestAnimationFrame",e=window["r"+t]||window["webkitR"+t]||window["mozR"+t]||window["oR"+t]||window["msR"+t];e&&e(function(t){null==t&&(e=null)});var i,r=[],s=!0;return q.add(window,{focus:function(){s=!0},blur:function(){s=!1}}),function(t,a){return e?e(t,a):(r.push([t,a]),i||(i=setInterval(function(){for(var t=r.length-1;t>=0;t--){var e=r[t],i=e[0],a=e[1];(!a||("true"==n.getAttribute(a,"keepalive")||s)&&R.isInView(a))&&(r.splice(t,1),i(Date.now()))}},1e3/60)),void 0)}};var V=t.extend(e,{_class:"View",initialize:function Se(t){this._scope=paper,this._project=paper.project,this._element=t;var e;if(this._id=t.getAttribute("id"),null==this._id&&t.setAttribute("id",this._id="view-"+Se._id++),q.add(t,this._viewHandlers),n.hasAttribute(t,"resize")){var i=R.getOffset(t,!0),r=this;e=R.getViewportBounds(t).getSize().subtract(i),this._windowHandlers={resize:function(){R.isInvisible(t)||(i=R.getOffset(t,!0)),r.setViewSize(R.getViewportBounds(t).getSize().subtract(i))}},q.add(window,this._windowHandlers)}else e=new u(parseInt(t.getAttribute("width"),10),parseInt(t.getAttribute("height"),10)),e.isNaN()&&(e=R.getSize(t));if(t.width=e.width,t.height=e.height,n.hasAttribute(t,"stats")&&"undefined"!=typeof Stats){this._stats=new Stats;var s=this._stats.domElement,a=s.style,i=R.getOffset(t);a.position="absolute",a.left=i.x+"px",a.top=i.y+"px",document.body.appendChild(s)}Se._views.push(this),Se._viewsById[this._id]=this,this._viewSize=new c(e.width,e.height,this,"setViewSize"),this._matrix=new _,this._zoom=1,Se._focused||(Se._focused=this),this._frameItems={},this._frameItemCount=0},remove:function(){return this._project?(V._focused==this&&(V._focused=null),V._views.splice(V._views.indexOf(this),1),delete V._viewsById[this._id],this._project.view==this&&(this._project.view=null),q.remove(this._element,this._viewHandlers),q.remove(window,this._windowHandlers),this._element=this._project=null,this.detach("frame"),this._frameItems={},!0):!1},_events:{onFrame:{install:function(){this._requested||(this._animate=!0,this._requestFrame())},uninstall:function(){this._animate=!1}},onResize:{}},_animate:!1,_time:0,_count:0,_requestFrame:function(){var t=this;q.requestAnimationFrame(function(){t._requested=!1,t._animate&&(t._requestFrame(),t._handleFrame())},this._element),this._requested=!0},_handleFrame:function(){paper=this._scope;var e=Date.now()/1e3,n=this._before?e-this._before:0;this._before=e,this._handlingFrame=!0,this.fire("frame",t.merge({delta:n,time:this._time+=n,count:this._count++})),this._stats&&this._stats.update(),this._handlingFrame=!1,this.draw(!0)},_animateItem:function(t,e){var n=this._frameItems;e?(n[t._id]={item:t,time:0,count:0},1===++this._frameItemCount&&this.attach("frame",this._handleFrameItems)):(delete n[t._id],0===--this._frameItemCount&&this.detach("frame",this._handleFrameItems))},_handleFrameItems:function(e){for(var n in this._frameItems){var i=this._frameItems[n];i.item.fire("frame",t.merge(e,{time:i.time+=e.delta,count:i.count++}))}},_redraw:function(){this._project._needsRedraw=!0,this._handlingFrame||(this._animate?this._handleFrame():this.draw())},_transform:function(t){this._matrix.concatenate(t),this._bounds=null,this._inverse=null,this._redraw()},getElement:function(){return this._element},getViewSize:function(){return this._viewSize},setViewSize:function(t){t=u.read(arguments);var e=t.subtract(this._viewSize);e.isZero()||(this._element.width=t.width,this._element.height=t.height,this._viewSize.set(t.width,t.height,!0),this._bounds=null,this.fire("resize",{size:t,delta:e}),this._redraw())},getBounds:function(){return this._bounds||(this._bounds=this._getInverse()._transformBounds(new d(new o,this._viewSize))),this._bounds},getSize:function(){return this.getBounds().getSize(arguments[0])},getCenter:function(){return this.getBounds().getCenter(arguments[0])},setCenter:function(t){t=o.read(arguments),this.scrollBy(t.subtract(this.getCenter()))},getZoom:function(){return this._zoom},setZoom:function(t){this._transform((new _).scale(t/this._zoom,this.getCenter())),this._zoom=t},isVisible:function(){return R.isInView(this._element)},scrollBy:function(){this._transform((new _).translate(o.read(arguments).negate()))},projectToView:function(){return this._matrix._transformPoint(o.read(arguments))},viewToProject:function(){return this._getInverse()._transformPoint(o.read(arguments))},_getInverse:function(){return this._inverse||(this._inverse=this._matrix.inverted()),this._inverse}},{statics:{_views:[],_viewsById:{},_id:0,create:function(t){return"string"==typeof t&&(t=document.getElementById(t)),new H(t)}}},new function(){function t(t){var e=q.getTarget(t);return e.getAttribute&&V._viewsById[e.getAttribute("id")]}function e(t,e){return t.viewToProject(q.getOffset(e,t._element))}function n(){if(!V._focused||!V._focused.isVisible())for(var t=0,e=V._views.length;e>t;t++){var n=V._views[t];if(n&&n.isVisible()){V._focused=u=n;break}}}function i(n){var i=V._focused=t(n),r=e(i,n);c=!0,i._onMouseDown&&i._onMouseDown(n,r),(o=i._scope._tool)&&o._onHandleEvent("mousedown",r,n),i.draw(!0)}function r(i){var r;if(c||(r=t(i),r?(h=V._focused,V._focused=u=r):u&&u==V._focused&&(V._focused=h,n())),r=r||V._focused){var s=i&&e(r,i);r._onMouseMove&&r._onMouseMove(i,s),(o=r._scope._tool)&&o._onHandleEvent(c&&o.responds("mousedrag")?"mousedrag":"mousemove",s,i)&&q.stop(i),r.draw(!0)}}function s(t){var n=V._focused;if(n&&c){var i=e(n,t);curPoint=null,c=!1,n._onMouseUp&&n._onMouseUp(t,i),o&&o._onHandleEvent("mouseup",i,t)&&q.stop(t),n.draw(!0)}}function a(t){c&&q.stop(t)}var o,h,u,c=!1;return q.add(document,{mousemove:r,mouseup:s,touchmove:r,touchend:s,selectstart:a,scroll:n}),q.add(window,{load:n}),{_viewHandlers:{mousedown:i,touchstart:i,selectstart:a},statics:{updateFocus:n}}}),H=V.extend({_class:"CanvasView",initialize:function(t){if(!(t instanceof HTMLCanvasElement)){var e=u.read(arguments,1);e.isZero()&&(e=new u(1024,768)),t=Y.getCanvas(e)}this._context=t.getContext("2d"),this._eventCounters={},V.call(this,t)},draw:function(t){if(t&&!this._project._needsRedraw)return!1;var e=this._context,n=this._viewSize;return e.clearRect(0,0,n._width+1,n._height+1),this._project.draw(e,this._matrix),this._project._needsRedraw=!1,!0}},new function(){function t(t,e,n,i,r,s){for(var a,o=i;o;){if(o.responds(t)&&(a||(a=new J(t,e,n,i,r?n.subtract(r):null)),o.fire(t,a)&&(!s||a._stopped)))return!1;o=o.getParent()}return!0}function e(e,n,i,r,s){if(e._eventCounters[n]){var a=e._project,u=a.hitTest(r,{tolerance:a.options.hitTolerance||0,fill:!0,stroke:!0}),c=u&&u.item;if(c)return"mousemove"===n&&c!=o&&(s=r),"mousemove"===n&&h||t(n,i,r,c,s),c}}var n,i,r,s,a,o,h,u,c;return{_onMouseDown:function(t,o){var l=e(this,"mousedown",t,o);u=a==l&&Date.now()-c<300,s=a=l,n=i=r=o,h=s&&s.responds("mousedrag")},_onMouseUp:function(a,o){var l=e(this,"mouseup",a,o);h&&(i&&!i.equals(o)&&t("mousedrag",a,o,s,i),l!=s&&(r=o,t("mousemove",a,o,l,r))),l===s&&(c=Date.now(),(!u||t("doubleclick",a,n,l))&&t("click",a,n,l),u=!1),s=null,h=!1},_onMouseMove:function(n,a){s&&t("mousedrag",n,a,s,i);var h=e(this,"mousemove",n,a,r);i=r=a,h!==o&&(t("mouseleave",n,a,o),o=h,t("mouseenter",n,a,h))}}}),Z=t.extend({_class:"Event",initialize:function(t){this.event=t},preventDefault:function(){this._prevented=!0,q.preventDefault(this.event)},stopPropagation:function(){this._stopped=!0,q.stopPropagation(this.event)},stop:function(){this.stopPropagation(),this.preventDefault()},getModifiers:function(){return X.modifiers}}),U=Z.extend({_class:"KeyEvent",initialize:function(t,e,n,i){Z.call(this,i),this.type=t?"keydown":"keyup",this.key=e,this.character=n},toString:function(){return"{ type: '"+this.type+"', key: '"+this.key+"', character: '"+this.character+"', modifiers: "+this.getModifiers()+" }"}}),X=new function(){function e(t,e,n,r){var s=String.fromCharCode(n),o=i[e]||s.toLowerCase(),h=t?"keydown":"keyup",u=V._focused,c=u&&u.isVisible()&&u._scope,l=c&&c._tool;a[o]=t,l&&l.responds(h)&&(l.fire(h,new U(t,o,s,r)),u&&u.draw(!0))}var n,i={8:"backspace",9:"tab",13:"enter",16:"shift",17:"control",18:"option",19:"pause",20:"caps-lock",27:"escape",32:"space",35:"end",36:"home",37:"left",38:"up",39:"right",40:"down",46:"delete",91:"command",93:"command",224:"command"},r=t.merge({shift:!1,control:!1,option:!1,command:!1,capsLock:!1,space:!1}),s={},a={};return q.add(document,{keydown:function(a){var o,h=a.which||a.keyCode,u=i[h];u?((o=t.camelize(u))in r&&(r[o]=!0),s[h]=0,e(!0,h,null,a)):n=h},keypress:function(t){if(null!=n){var i=t.which||t.keyCode;s[n]=i,e(!0,n,i,t),n=null}},keyup:function(n){var a,o=n.which||n.keyCode,h=i[o];h&&(a=t.camelize(h))in r&&(r[a]=!1),null!=s[o]&&(e(!1,o,s[o],n),delete s[o])}}),{modifiers:r,isDown:function(t){return!!a[t]}}},J=Z.extend({_class:"MouseEvent",initialize:function(t,e,n,i,r){Z.call(this,e),this.type=t,this.point=n,this.target=i,this.delta=r},toString:function(){return"{ type: '"+this.type+"', point: "+this.point+", target: "+this.target+(this.delta?", delta: "+this.delta:"")+", modifiers: "+this.getModifiers()+" }"}});t.extend(e,{_class:"Palette",_events:["onChange"],initialize:function(e,n,i){var r=R.find(".palettejs-panel")||R.find("body").appendChild(R.create("div",{"class":"palettejs-panel"}));this._element=r.appendChild(R.create("table",{"class":"palettejs-pane"})),this._title=e,i||(i={});for(var s in this._components=n){var a=n[s];a instanceof $||(null==a.value&&(a.value=i[s]),a.name=s,a=n[s]=new $(a)),this._element.appendChild(a._element),a._palette=this,void 0===i[s]&&(i[s]=a.value)}this._values=t.each(i,function(e,r){var s=n[r];s&&t.define(i,r,{enumerable:!0,configurable:!0,get:function(){return s._value},set:function(t){s.setValue(t)}})}),window.paper&&paper.palettes.push(this)},reset:function(){for(var t in this._components)this._components[t].reset()},remove:function(){R.remove(this._element)}});var $=t.extend(e,{_class:"Component",_events:["onChange","onClick"],_types:{"boolean":{type:"checkbox",value:"checked"},string:{type:"text"},number:{type:"number",number:!0},button:{type:"button"},text:{tag:"div",value:"text"},slider:{type:"range",number:!0},list:{tag:"select",options:function(){R.removeChildren(this._inputItem),R.create(t.each(this._options,function(t){this.push("option",{value:t,text:t})},[]),this._inputItem)}}},initialize:function(e){this._type=e.type in this._types?e.type:"options"in e?"list":"onClick"in e?"button":typeof e.value,this._info=this._types[this._type]||{type:this._type};var n=this,i=!1;this._inputItem=R.create(this._info.tag||"input",{type:this._info.type,events:{change:function(){n.setValue(R.get(this,n._info.value||"value")),i&&(n._palette.fire("change",n,n.name,n._value),n.fire("change",n._value))},click:function(){n.fire("click")}}}),this._element=R.create("tr",[this._labelItem=R.create("td"),"td",[this._inputItem]]),t.each(e,function(t,e){this[e]=t},this),this._defaultValue=this._value,i=!0},getType:function(){return this._type},getLabel:function(){return this._label},setLabel:function(t){this._label=t,R.set(this._labelItem,"text",t+":")},getOptions:function(){return this._options},setOptions:function(t){this._options=t,this._info.options&&this._info.options.call(this)},getValue:function(){return this._value},setValue:function(t){var e=this._info.value||"value";R.set(this._inputItem,e,t),t=R.get(this._inputItem,e),this._value=this._info.number?parseFloat(t,10):t},getRange:function(){return[parseFloat(R.get(this._inputItem,"min")),parseFloat(R.get(this._inputItem,"max"))]},setRange:function(t,e){var n=Array.isArray(t)?t:[t,e];R.set(this._inputItem,{min:n[0],max:n[1]})},getMin:function(){return this.getRange()[0]},setMin:function(t){this.setRange(t,this.getMax())},getMax:function(){return this.getRange()[1]},setMax:function(t){this.setRange(this.getMin(),t)},getStep:function(){return parseFloat(R.get(this._inputItem,"step"))},setStep:function(t){R.set(this._inputItem,"step",t)},reset:function(){this.setValue(this._defaultValue)}}),G=Z.extend({_class:"ToolEvent",_item:null,initialize:function(t,e,n){this.tool=t,this.type=e,this.event=n},_choosePoint:function(t,e){return t?t:e?e.clone():null},getPoint:function(){return this._choosePoint(this._point,this.tool._point)},setPoint:function(t){this._point=t},getLastPoint:function(){return this._choosePoint(this._lastPoint,this.tool._lastPoint)},setLastPoint:function(t){this._lastPoint=t},getDownPoint:function(){return this._choosePoint(this._downPoint,this.tool._downPoint)},setDownPoint:function(t){this._downPoint=t},getMiddlePoint:function(){return!this._middlePoint&&this.tool._lastPoint?this.tool._point.add(this.tool._lastPoint).divide(2):this._middlePoint},setMiddlePoint:function(t){this._middlePoint=t},getDelta:function(){return!this._delta&&this.tool._lastPoint?this.tool._point.subtract(this.tool._lastPoint):this._delta},setDelta:function(t){this._delta=t},getCount:function(){return/^mouse(down|up)$/.test(this.type)?this.tool._downCount:this.tool._count},setCount:function(t){this.tool[/^mouse(down|up)$/.test(this.type)?"downCount":"count"]=t},getItem:function(){if(!this._item){var t=this.tool._scope.project.hitTest(this.getPoint());if(t){for(var e=t.item,n=e._parent;/^(group|compound-path)$/.test(n._type);)e=n,n=n._parent;this._item=e}}return this._item},setItem:function(t){this._item=t},toString:function(){return"{ type: "+this.type+", point: "+this.getPoint()+", count: "+this.getCount()+", modifiers: "+this.getModifiers()+" }"}}),W=r.extend({_class:"Tool",_list:"tools",_reference:"_tool",_events:["onActivate","onDeactivate","onEditOptions","onMouseDown","onMouseUp","onMouseDrag","onMouseMove","onKeyDown","onKeyUp"],initialize:function(t){r.call(this),this._firstMove=!0,this._count=0,this._downCount=0,this._set(t)},getMinDistance:function(){return this._minDistance},setMinDistance:function(t){this._minDistance=t,null!=this._minDistance&&null!=this._maxDistance&&this._minDistance>this._maxDistance&&(this._maxDistance=this._minDistance)},getMaxDistance:function(){return this._maxDistance},setMaxDistance:function(t){this._maxDistance=t,null!=this._minDistance&&null!=this._maxDistance&&this._maxDistance<this._minDistance&&(this._minDistance=t)},getFixedDistance:function(){return this._minDistance==this._maxDistance?this._minDistance:null},setFixedDistance:function(t){this._minDistance=t,this._maxDistance=t},_updateEvent:function(t,e,n,i,r,s,a){if(!r){if(null!=n||null!=i){var o=null!=n?n:0,h=e.subtract(this._point),u=h.getLength();if(o>u)return!1;var c=null!=i?i:0;if(0!=c)if(u>c)e=this._point.add(h.normalize(c));else if(a)return!1}if(s&&e.equals(this._point))return!1}switch(this._lastPoint=r&&"mousemove"==t?e:this._point,this._point=e,t){case"mousedown":this._lastPoint=this._downPoint,this._downPoint=this._point,this._downCount++;break;case"mouseup":this._lastPoint=this._downPoint}return this._count=r?0:this._count+1,!0},_fireEvent:function(t,e){var n=paper.project._removeSets;if(n){"mouseup"===t&&(n.mousedrag=null);var i=n[t];if(i){for(var r in i){var s=i[r];for(var a in n){var o=n[a];o&&o!=i&&delete o[s._id]}s.remove()}n[t]=null}}return this.responds(t)&&this.fire(t,new G(this,t,e))},_onHandleEvent:function(t,e,n){paper=this._scope;var i=!1;switch(t){case"mousedown":this._updateEvent(t,e,null,null,!0,!1,!1),i=this._fireEvent(t,n);break;case"mousedrag":for(var r=!1,s=!1;this._updateEvent(t,e,this.minDistance,this.maxDistance,!1,r,s);)i=this._fireEvent(t,n)||i,r=!0,s=!0;break;case"mouseup":!e.equals(this._point)&&this._updateEvent("mousedrag",e,this.minDistance,this.maxDistance,!1,!1,!1)&&(i=this._fireEvent("mousedrag",n)),this._updateEvent(t,e,null,this.maxDistance,!1,!1,!1),i=this._fireEvent(t,n)||i,this._updateEvent(t,e,null,null,!0,!1,!1),this._firstMove=!0;break;case"mousemove":for(;this._updateEvent(t,e,this.minDistance,this.maxDistance,this._firstMove,!0,!1);)i=this._fireEvent(t,n)||i,this._firstMove=!1}return i}}),Y={canvases:[],getCanvas:function(t,e){var n,i=void 0===e?t:new u(t,e),r=!0;n=this.canvases.length?this.canvases.pop():document.createElement("canvas");var s=n.getContext("2d");return s.save(),n.width===i.width&&n.height===i.height?r&&s.clearRect(0,0,i.width+1,i.height+1):(n.width=i.width,n.height=i.height),n},getContext:function(t,e){return this.getCanvas(t,e).getContext("2d")},release:function(t){var e=t.canvas?t.canvas:t;e.getContext("2d").restore(),this.canvases.push(e)}},K=new function(){function e(t,e,n){return.2989*t+.587*e+.114*n}function n(t,n,i,r){var s=r-e(t,n,i);f=t+s,_=n+s,g=i+s;var r=e(f,_,g),a=p(f,_,g),o=v(f,_,g);if(0>a){var h=r-a;f=r+(f-r)*r/h,_=r+(_-r)*r/h,g=r+(g-r)*r/h}if(o>255){var u=255-r,c=o-r;f=r+(f-r)*u/c,_=r+(_-r)*u/c,g=r+(g-r)*u/c}}function i(t,e,n){return v(t,e,n)-p(t,e,n)}function r(t,e,n,i){var r,s=[t,e,n],a=v(t,e,n),o=p(t,e,n);o=o===t?0:o===e?1:2,a=a===t?0:a===e?1:2,r=0===p(o,a)?1===v(o,a)?2:1:0,s[a]>s[o]?(s[r]=(s[r]-s[o])*i/(s[a]-s[o]),s[a]=i):s[r]=s[a]=0,s[o]=0,f=s[0],_=s[1],g=s[2]}var s,a,o,h,u,c,l,d,f,_,g,p=Math.min,v=Math.max,m=Math.abs,y={multiply:function(){f=u*s/255,_=c*a/255,g=l*o/255},screen:function(){f=u+s-u*s/255,_=c+a-c*a/255,g=l+o-l*o/255},overlay:function(){f=128>u?2*u*s/255:255-2*(255-u)*(255-s)/255,_=128>c?2*c*a/255:255-2*(255-c)*(255-a)/255,g=128>l?2*l*o/255:255-2*(255-l)*(255-o)/255},"soft-light":function(){var t=s*u/255;f=t+u*(255-(255-u)*(255-s)/255-t)/255,t=a*c/255,_=t+c*(255-(255-c)*(255-a)/255-t)/255,t=o*l/255,g=t+l*(255-(255-l)*(255-o)/255-t)/255},"hard-light":function(){f=128>s?2*s*u/255:255-2*(255-s)*(255-u)/255,_=128>a?2*a*c/255:255-2*(255-a)*(255-c)/255,g=128>o?2*o*l/255:255-2*(255-o)*(255-l)/255},"color-dodge":function(){f=0===u?0:255===s?255:p(255,255*u/(255-s)),_=0===c?0:255===a?255:p(255,255*c/(255-a)),g=0===l?0:255===o?255:p(255,255*l/(255-o))},"color-burn":function(){f=255===u?255:0===s?0:v(0,255-255*(255-u)/s),_=255===c?255:0===a?0:v(0,255-255*(255-c)/a),g=255===l?255:0===o?0:v(0,255-255*(255-l)/o)},darken:function(){f=s>u?u:s,_=a>c?c:a,g=o>l?l:o},lighten:function(){f=u>s?u:s,_=c>a?c:a,g=l>o?l:o},difference:function(){f=u-s,0>f&&(f=-f),_=c-a,0>_&&(_=-_),g=l-o,0>g&&(g=-g)},exclusion:function(){f=u+s*(255-u-u)/255,_=c+a*(255-c-c)/255,g=l+o*(255-l-l)/255},hue:function(){r(s,a,o,i(u,c,l)),n(f,_,g,e(u,c,l))},saturation:function(){r(u,c,l,i(s,a,o)),n(f,_,g,e(u,c,l))},luminosity:function(){n(u,c,l,e(s,a,o))},color:function(){n(s,a,o,e(u,c,l))},add:function(){f=p(u+s,255),_=p(c+a,255),g=p(l+o,255)},subtract:function(){f=v(u-s,0),_=v(c-a,0),g=v(l-o,0)},average:function(){f=(u+s)/2,_=(c+a)/2,g=(l+o)/2},negation:function(){f=255-m(255-s-u),_=255-m(255-a-c),g=255-m(255-o-l)}},w=this.nativeModes=t.each(["source-over","source-in","source-out","source-atop","destination-over","destination-in","destination-out","destination-atop","lighter","darker","copy","xor"],function(t){this[t]=!0},{}),x=Y.getContext(1,1);t.each(y,function(t,e){x.save();var n="darken"===e,i=!1;x.fillStyle=n?"#300":"#a00",x.fillRect(0,0,1,1),x.globalCompositeOperation=e,x.globalCompositeOperation===e&&(x.fillStyle=n?"#a00":"#300",x.fillRect(0,0,1,1),i=x.getImageData(0,0,1,1).data[0]!==(n?170:51)),w[e]=i,x.restore()}),Y.release(x),this.process=function(t,e,n,i,r){var p=e.canvas,v="normal"===t;if(v||w[t])n.save(),n.setTransform(1,0,0,1,0,0),n.globalAlpha=i,v||(n.globalCompositeOperation=t),n.drawImage(p,r.x,r.y),n.restore();else{var m=y[t];if(!m)return;for(var x=n.getImageData(r.x,r.y,p.width,p.height),b=x.data,C=e.getImageData(0,0,p.width,p.height).data,S=0,k=b.length;k>S;S+=4){s=C[S],u=b[S],a=C[S+1],c=b[S+1],o=C[S+2],l=b[S+2],h=C[S+3],d=b[S+3],m();var P=h*i/255,M=1-P;b[S]=P*f+M*u,b[S+1]=P*_+M*c,b[S+2]=P*g+M*l,b[S+3]=h*i+M*d}n.putImageData(x,r.x,r.y)}}},Q=t.each({fillColor:["fill","color"],strokeColor:["stroke","color"],strokeWidth:["stroke-width","number"],strokeCap:["stroke-linecap","string"],strokeJoin:["stroke-linejoin","string"],miterLimit:["stroke-miterlimit","number"],dashArray:["stroke-dasharray","array"],dashOffset:["stroke-dashoffset","number"],font:["font-family","string"],fontSize:["font-size","number"],justification:["text-anchor","lookup",{left:"start",center:"middle",right:"end"}],opacity:["opacity","number"],blendMode:["mix-blend-mode","string"]},function(e,n){var i=t.capitalize(n),r=e[2];this[n]={type:e[1],property:n,attribute:e[0],toSVG:r,fromSVG:r&&t.each(r,function(t,e){this[t]=e},{}),get:"get"+i,set:"set"+i}},{}),te={href:"http://www.w3.org/1999/xlink",xlink:"http://www.w3.org/2000/xmlns"};return new function(){function e(t,e){for(var n in e){var i=e[n],r=te[n];"number"==typeof i&&(i=z.number(i)),r?t.setAttributeNS(r,n,i):t.setAttribute(n,i)}return t}function n(t,n){return e(document.createElementNS("http://www.w3.org/2000/svg",t),n)}function r(t,e,n){return t[e]._point.getDistance(t[n]._point)}function o(t,e){var n=t._matrix,i=n.getTranslation(),r={};if(e){n=n.shiftless();var s=n._inverseTransform(i);r.x=s.x,r.y=s.y,i=null}if(n.isIdentity())return r;var o=n.decompose();if(o&&!o.shearing){var h=[],u=o.rotation,c=o.scaling;i&&!i.isZero()&&h.push("translate("+z.point(i)+")"),a.isZero(c.x-1)&&a.isZero(c.y-1)||h.push("scale("+z.point(c)+")"),u&&h.push("rotate("+z.number(u)+")"),r.transform=h.join(" ")}else r.transform="matrix("+n.getValues().join(",")+")";return r}function h(t,e,n,i){var r="rect"===n?e[1]._point.add(e[2]._point).divide(2):"roundrect"===n?e[3]._point.add(e[4]._point).divide(2):"circle"===n||"ellipse"===n?e[1]._point:null,s=r&&r.subtract(i).getAngle()+90;return a.isZero(s||0)?0:s}function u(t,e){function n(t,n){var i=e[t],r=i.getNext(),s=e[n],a=s.getNext();return i._handleOut.isZero()&&r._handleIn.isZero()&&s._handleOut.isZero()&&a._handleIn.isZero()&&r._point.subtract(i._point).isColinear(a._point.subtract(s._point))}function i(t){var n=e[t],i=n.getNext(),r=n._handleOut,s=i._handleIn,o=a.KAPPA;if(r.isOrthogonal(s)){var h=n._point,u=i._point,c=new g(h,r,!0).intersect(new g(u,s,!0),!0);return c&&a.isZero(r.getLength()/c.subtract(h).getLength()-o)&&a.isZero(s.getLength()/c.subtract(u).getLength()-o)}}if(t.isPolygon())return 4===e.length&&t._closed&&n(0,2)&&n(1,3)?"rect":0===e.length?"empty":e.length>=3?t._closed?"polygon":"polyline":"line";if(t._closed){if(8===e.length&&i(0)&&i(2)&&i(4)&&i(6)&&n(1,5)&&n(3,7))return"roundrect";if(4===e.length&&i(0)&&i(1)&&i(2)&&i(3))return a.isZero(r(e,0,2)-r(e,1,3))?"circle":"ellipse"}return"path"}function c(t){for(var i=o(t),r=t._children,s=n("g",i),a=0,h=r.length;h>a;a++){var u=r[a],c=P(u);if(c)if(u.isClipMask()){var l=n("clipPath");l.appendChild(c),S(u,l,"clip"),e(s,{"clip-path":"url(#"+l.id+")"})}else s.appendChild(c)}return s}function d(t){var e=o(t,!0),i=t.getSize();return e.x-=i.width/2,e.y-=i.height/2,e.width=i.width,e.height=i.height,e.href=t.toDataURL(),n("image",e)}function f(t){var e,s=t._segments,a=t.getPosition(!0),o=u(t,s),c=h(t,s,o,a);switch(o){case"empty":return null;case"path":var d=t.getPathData();e=d&&{d:d};break;case"polyline":case"polygon":var f=[];for(i=0,l=s.length;l>i;i++)f.push(z.point(s[i]._point));e={points:f.join(" ")};break;case"rect":var g=r(s,0,3),p=r(s,0,1),v=s[1]._point.rotate(-c,a);e={x:v.x,y:v.y,width:g,height:p};break;case"roundrect":o="rect";var g=r(s,1,6),p=r(s,0,3),m=(g-r(s,0,7))/2,y=(p-r(s,1,2))/2,w=s[3]._point,x=s[4]._point,v=w.subtract(x.subtract(w).normalize(m)).rotate(-c,a);e={x:v.x,y:v.y,width:g,height:p,rx:m,ry:y};break;case"line":var b=s[0]._point,C=s[s.length-1]._point;e={x1:b.x,y1:b.y,x2:C.x,y2:C.y};break;case"circle":var S=r(s,0,2)/2;e={cx:a.x,cy:a.y,r:S};break;case"ellipse":var m=r(s,2,0)/2,y=r(s,3,1)/2;e={cx:a.x,cy:a.y,rx:m,ry:y}}return c&&(e.transform="rotate("+z.number(c)+","+z.point(a)+")",t._gradientMatrix=(new _).rotate(-c,a)),n(o,e)}function v(t){var e=o(t,!0),i=t.getPathData();return i&&(e.d=i),n("path",e)}function y(t){var e=o(t,!0),i=t.getSymbol(),r=C(i,"symbol");return definition=i.getDefinition(),bounds=definition.getBounds(),r||(r=n("symbol",{viewBox:z.rectangle(bounds)}),r.appendChild(P(definition)),S(i,r,"symbol")),e.href="#"+r.id,e.x+=bounds.x,e.y+=bounds.y,e.width=z.number(bounds.width),e.height=z.number(bounds.height),n("use",e)}function w(t,e){var i=C(t,"color");if(!i){var r,s=t.getGradient(),a=s._radial,o=e._gradientMatrix,h=t.getOrigin().transform(o),u=t.getDestination().transform(o);if(a){r={cx:h.x,cy:h.y,r:h.getDistance(u)};var c=t.getHighlight();c&&(c=c.transform(o),r.fx=c.x,r.fy=c.y)}else r={x1:h.x,y1:h.y,x2:u.x,y2:u.y};r.gradientUnits="userSpaceOnUse",i=n((a?"radial":"linear")+"Gradient",r);for(var l=s._stops,d=0,f=l.length;f>d;d++){var _=l[d],g=_._color,p=g.getAlpha();r={offset:_._rampPoint,"stop-color":g.toCSS(!0)},1>p&&(r["stop-opacity"]=p),i.appendChild(n("stop",r))}S(t,i,"color")}return"url(#"+i.id+")"}function x(t){var e=n("text",o(t,!0));return e.textContent=t._content,e}function b(n,i){var r={},s=n.getParent();return null!=n._name&&(r.id=n._name),t.each(Q,function(e){var i=e.get,a=e.type,o=n[i]();if(!s||!t.equals(s[i](),o)){if("color"===a&&null!=o){var h=o.getAlpha();1>h&&(r[e.attribute+"-opacity"]=h)}r[e.attribute]=null==o?"none":"number"===a?z.number(o):"color"===a?o.gradient?w(o,n):o.toCSS(!0):"array"===a?o.join(","):"lookup"===a?e.toSVG[o]:o}}),1===r.opacity&&delete r.opacity,null==n._visibility||n._visibility||(r.visibility="hidden"),delete n._gradientMatrix,e(i,r)}function C(t,e){return I||(I={ids:{},svgs:{}}),t&&I.svgs[e+"-"+t._id]}function S(t,e,n){I||C();var i=I.ids[n]=(I.ids[n]||0)+1;e.id=n+"-"+i,I.svgs[n+"-"+t._id]=e}function k(t,e){if(!I)return t;var i="svg"===t.nodeName.toLowerCase()&&t,r=null;for(var s in I.svgs)r||(i||(i=n("svg"),i.appendChild(t)),r=i.insertBefore(n("defs"),i.firstChild)),r.appendChild(I.svgs[s]);return I=null,e&&e.asString?(new XMLSerializer).serializeToString(i):i}function P(t){var e=A[t._type],n=e&&e(t,t._type);return n&&t._data&&n.setAttribute("data-paper-data",JSON.stringify(t._data)),n&&b(t,n)}function M(t){z=t&&t.precision?new s(t.precision):s.instance}var z,I,A={group:c,layer:c,raster:d,path:f,"compound-path":v,"placed-symbol":y,"point-text":x};m.inject({exportSVG:function(t){return M(t),k(P(this),t)}}),p.inject({exportSVG:function(t){M(t);for(var e=this.layers,i=this.view.getSize(),r=n("svg",{x:0,y:0,width:i.width,height:i.height,version:"1.1",xmlns:"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink"}),s=0,a=e.length;a>s;s++)r.appendChild(P(e[s]));return k(r,t)}})},new function(){function e(t,e,n,i){var r=te[e],s=r?t.getAttributeNS(r,e):t.getAttribute(e);return"null"===s&&(s=null),null==s?i?null:n?"":0:n?s:parseFloat(s)}function n(t,n,i,r){return n=e(t,n,!1,r),i=e(t,i,!1,r),r&&null==n&&null==i?null:new o(n||0,i||0)}function i(t,n,i,r){return n=e(t,n,!1,r),i=e(t,i,!1,r),r&&null==n&&null==i?null:new u(n||0,i||0)}function r(t,e,n){return"none"===t?null:"number"===e?parseFloat(t):"array"===e?t?t.split(/[\s,]+/g).map(parseFloat):[]:"color"===e?x(t)||t:"lookup"===e?n[t]:t}function s(t,e){var n=t.childNodes,i="clippath"===e,r=i?new L:new y,s=r._project,a=s._currentStyle,o=[];i||(r._transformContent=!1,r=w(r,t),s._currentStyle=r._style.clone());for(var h=0,u=n.length;u>h;h++){var c,l=n[h];1==l.nodeType&&(c=C(l))&&(i&&c instanceof L?(o.push.apply(o,c.removeChildren()),c.remove()):c instanceof v||o.push(c))}return r.addChildren(o),i&&(r=w(r.reduce(),t)),s._currentStyle=a,(i||"defs"===e)&&(r.remove(),r=null),r}function a(t,e){var n=new A,i=t.points;n.moveTo(i.getItem(0));for(var r=1,s=i.numberOfItems;s>r;r++)n.lineTo(i.getItem(r));return"polygon"===e&&n.closePath(),n}function h(t){var e=t.getAttribute("d"),n=e.match(/m/gi).length>1?new L:new A;return n.setPathData(e),n}function c(t,i){for(var r=t.childNodes,s=[],a=0,o=r.length;o>a;a++){var h=r[a];1==h.nodeType&&s.push(w(new N,h))}var u,c,l,d="radialgradient"===i,f=new E(s,d);return d?(u=n(t,"cx","cy"),c=u.add(e(t,"r"),0),l=n(t,"fx","fy",!0)):(u=n(t,"x1","y1"),c=n(t,"x2","y2")),w(new B(f,u,c,l),t),null}function l(t,e,n,i){for(var r=(i.getAttribute(n)||"").split(/\)\s*/g),s=new _,a=0,o=r.length;o>a;a++){var h=r[a];if(!h)break;for(var u=h.split("("),c=u[0],l=u[1].split(/[\s,]+/g),d=0,f=l.length;f>d;d++)l[d]=parseFloat(l[d]);switch(c){case"matrix":s.concatenate(new _(l[0],l[2],l[1],l[3],l[4],l[5]));break;case"rotate":s.rotate(l[0],l[1],l[2]);break;case"translate":s.translate(l[0],l[1]);break;case"scale":s.scale(l);break;case"skewX":case"skewY":var e=Math.tan(l[0]*Math.PI/180),g="skewX"==c;s.shear(g?e:0,g?0:e)}}t.transform(s)}function f(t,e,n){var i=t["fill-opacity"===n?"getFillColor":"getStrokeColor"]();i&&i.setAlpha(parseFloat(e))}function g(e,n,i){var r=e.attributes[n],s=r&&r.value;if(!s){var a=t.camelize(n);s=e.style[a],s||i.node[a]===i.parent[a]||(s=i.node[a])}return s?"none"===s?null:s:void 0}function w(e,n){var i={node:R.getStyles(n)||{},parent:R.getStyles(n.parentNode)||{}};return t.each(k,function(r,s){var a=g(n,s,i);void 0!==a&&(e=t.pick(r(e,a,s,n,i),e))}),e}function x(t){var e=t&&t.match(/\((?:#|)([^)']+)/);return e&&P[e[1]]}function C(t,e){"string"==typeof t&&(t=(new DOMParser).parseFromString(t,"image/svg+xml"));var n=t.nodeName.toLowerCase(),i=S[n],r=i&&i(t,n),s=t.getAttribute("data-paper-data");return!r||r instanceof y||(r=w(r,t)),r&&s&&(r._data=JSON.parse(s)),e&&(P={}),r}var S={g:s,svg:s,clippath:s,polygon:a,polyline:a,path:h,lineargradient:c,radialgradient:c,image:function(t){var r=new b(e(t,"href",!0));return r.attach("load",function(){var e=i(t,"width","height");this.setSize(e),this.translate(n(t,"x","y").add(e.divide(2)))}),r},symbol:function(t,e){return new v(s(t,e),!0)},defs:s,use:function(t){var i=(e(t,"href",!0)||"").substring(1),r=P[i],s=n(t,"x","y");return r?r instanceof v?r.place(s):r.clone().translate(s):null},circle:function(t){return new A.Circle(n(t,"cx","cy"),e(t,"r"))},ellipse:function(t){var e=n(t,"cx","cy"),r=i(t,"rx","ry");return new A.Ellipse(new d(e.subtract(r),e.add(r)))},rect:function(t){var e=n(t,"x","y"),r=i(t,"width","height"),s=i(t,"rx","ry");return new A.Rectangle(new d(e,r),s)},line:function(t){return new A.Line(n(t,"x1","y1"),n(t,"x2","y2"))},text:function(t){var e=new j(n(t,"x","y",!1).add(n(t,"dx","dy",!1)));return e.setContent(t.textContent.trim()||""),e}},k=t.merge(t.each(Q,function(t){this[t.attribute]=function(e,n){e[t.set](r(n,t.type,t.fromSVG))}},{}),{id:function(t,e){P[e]=t,t.setName&&t.setName(e)},"clip-path":function(t,e){var n=x(e);if(n){if(n=n.clone(),n.setClipMask(!0),!(t instanceof y))return new y(n,t);t.insertChild(0,n)}},gradientTransform:l,transform:l,"fill-opacity":f,"stroke-opacity":f,visibility:function(t,e){t.setVisible("visible"===e)},"stop-color":function(t,e){t.setColor&&t.setColor(e)},"stop-opacity":function(t,e){t._color&&t._color.setAlpha(parseFloat(e))},offset:function(t,e){var n=e.match(/(.*)%$/);t.setRampPoint(n?n[1]/100:parseFloat(e))},viewBox:function(t,e,n,s,a){var o=new d(r(e,"array")),h=i(s,"width","height",!0);if(t instanceof y){var u=h?o.getSize().divide(h):1,c=(new _).translate(o.getPoint()).scale(u);t.transform(c.inverted())}else if(t instanceof v){h&&o.setSize(h);var l="visible"!=g(s,"overflow",a),f=t._definition;l&&!o.contains(f.getBounds())&&(l=new A.Rectangle(o).transform(f._matrix),l.setClipMask(!0),f.addChild(l))}}}),P={};m.inject({importSVG:function(t){return this.addChild(C(t,!0))}}),p.inject({importSVG:function(t){return this.activate(),C(t,!0)}})},paper=new(n.inject(t.merge(t.exports,{enumerable:!0,Base:t,Numerical:a,DomElement:R,DomEvent:q,Key:X}))),"function"==typeof define&&define.amd&&define(paper),paper};paper.PaperScope.prototype.PaperScript=function(root){function _$_(t,e,n){var i=binaryOperators[e];if(t&&t[i]){var r=t[i](n);return"!="===e?!r:r}switch(e){case"+":return t+n;case"-":return t-n;case"*":return t*n;case"/":return t/n;case"%":return t%n;case"==":return t==n;case"!=":return t!=n}}function $_(t,e){var n=unaryOperators[t];if(n&&e&&e[n])return e[n]();switch(t){case"+":return+e;case"-":return-e}}function compile(t){function e(t){for(var e=0,n=s.length;n>e;e++){var i=s[e];if(i[0]>=t)break;t+=i[1]}return t}function n(n){return t.substring(e(n.range[0]),e(n.range[1]))
 }function i(n,i){for(var r=e(n.range[0]),a=e(n.range[1]),o=0,h=s.length-1;h>=0;h--)if(r>s[h][0]){o=h+1;break}s.splice(o,0,[r,i.length-a+r]),t=t.substring(0,r)+i+t.substring(a)}function r(t){if(t&&("MemberExpression"!==t.type||!t.computed)){for(var e in t)if("range"!==e){var s=t[e];if(Array.isArray(s))for(var a=0,o=s.length;o>a;a++)r(s[a]);else s&&"object"==typeof s&&r(s)}switch(t&&t.type){case"BinaryExpression":if(t.operator in binaryOperators&&"Literal"!==t.left.type){var h=n(t.left),u=n(t.right);i(t,"_$_("+h+', "'+t.operator+'", '+u+")")}break;case"AssignmentExpression":if(/^.=$/.test(t.operator)&&"Literal"!==t.left.type){var h=n(t.left),u=n(t.right);i(t,h+" = _$_("+h+', "'+t.operator[0]+'", '+u+")")}break;case"UpdateExpression":if(!t.prefix){var c=n(t.argument);i(t,c+" = _$_("+c+', "'+t.operator[0]+'", 1)')}break;case"UnaryExpression":if(t.operator in unaryOperators&&"Literal"!==t.argument.type){var c=n(t.argument);i(t,'$_("'+t.operator+'", '+c+")")}}}}var s=[];return r(scope.acorn.parse(t,{ranges:!0})),t}function evaluate(code,scope){paper=scope;var view=scope.project&&scope.project.view,res;with(scope)!function(){var onActivate,onDeactivate,onEditOptions,onMouseDown,onMouseUp,onMouseDrag,onMouseMove,onKeyDown,onKeyUp,onFrame,onResize;res=eval(compile(code)),/on(?:Key|Mouse)(?:Up|Down|Move|Drag)/.test(code)&&Base.each(paper.Tool.prototype._events,function(key){var value=eval(key);value&&(scope.getTool()[key]=value)}),view&&(view.setOnResize(onResize),view.fire("resize",{size:view.size,delta:new Point}),view.setOnFrame(onFrame),view.draw())}.call(scope);return res}function request(t,e){var n=new(window.ActiveXObject||XMLHttpRequest)("Microsoft.XMLHTTP");return n.open("GET",t,!0),n.overrideMimeType&&n.overrideMimeType("text/plain"),n.onreadystatechange=function(){return 4===n.readyState?evaluate(n.responseText,e):void 0},n.send(null)}function load(){for(var t=document.getElementsByTagName("script"),e=0,n=t.length;n>e;e++){var i=t[e];if(/^text\/(?:x-|)paperscript$/.test(i.type)&&!i.getAttribute("data-paper-ignore")){var r=PaperScope.getAttribute(i,"canvas"),s=PaperScope.get(r)||new PaperScope(i).setup(r);i.src?request(i.src,s):evaluate(i.innerHTML,s),i.setAttribute("data-paper-ignore",!0)}}}var Base=paper.Base,PaperScope=paper.PaperScope,exports,define,scope=this;!function(t,e){return"object"==typeof exports&&"object"==typeof module?e(exports):"function"==typeof define&&define.amd?define(["exports"],e):(e(t.acorn||(t.acorn={})),void 0)}(this,function(t){"use strict";function e(t){le=t||{};for(var e in ge)Object.prototype.hasOwnProperty.call(le,e)||(le[e]=ge[e]);_e=le.sourceFile||null}function n(t,e){var n=pe(de,t);e+=" ("+n.line+":"+n.column+")";var i=new SyntaxError(e);throw i.pos=t,i.loc=n,i.raisedAt=ve,i}function i(t){function e(t){if(1==t.length)return n+="return str === "+JSON.stringify(t[0])+";";n+="switch(str){";for(var e=0;e<t.length;++e)n+="case "+JSON.stringify(t[e])+":";n+="return true}return false;"}t=t.split(" ");var n="",i=[];t:for(var r=0;r<t.length;++r){for(var s=0;s<i.length;++s)if(i[s][0].length==t[r].length){i[s].push(t[r]);continue t}i.push([t[r]])}if(i.length>3){i.sort(function(t,e){return e.length-t.length}),n+="switch(str.length){";for(var r=0;r<i.length;++r){var a=i[r];n+="case "+a[0].length+":",e(a)}n+="}"}else e(t);return Function("str",n)}function r(){this.line=ke,this.column=ve-Pe}function s(){ke=1,ve=Pe=0,Se=!0,u()}function a(t,e){ye=ve,le.locations&&(xe=new r),be=t,u(),Ce=e,Se=t.beforeExpr}function o(){var t=le.onComment&&le.locations&&new r,e=ve,i=de.indexOf("*/",ve+=2);if(-1===i&&n(ve-2,"Unterminated comment"),ve=i+2,le.locations){Yn.lastIndex=e;for(var s;(s=Yn.exec(de))&&s.index<ve;)++ke,Pe=s.index+s[0].length}le.onComment&&le.onComment(!0,de.slice(e+2,i),e,ve,t,le.locations&&new r)}function h(){for(var t=ve,e=le.onComment&&le.locations&&new r,n=de.charCodeAt(ve+=2);fe>ve&&10!==n&&13!==n&&8232!==n&&8329!==n;)++ve,n=de.charCodeAt(ve);le.onComment&&le.onComment(!1,de.slice(t+2,ve),t,ve,e,le.locations&&new r)}function u(){for(;fe>ve;){var t=de.charCodeAt(ve);if(32===t)++ve;else if(13===t){++ve;var e=de.charCodeAt(ve);10===e&&++ve,le.locations&&(++ke,Pe=ve)}else if(10===t)++ve,++ke,Pe=ve;else if(14>t&&t>8)++ve;else if(47===t){var e=de.charCodeAt(ve+1);if(42===e)o();else{if(47!==e)break;h()}}else if(160===t)++ve;else{if(!(t>=5760&&Un.test(String.fromCharCode(t))))break;++ve}}}function c(){var t=de.charCodeAt(ve+1);return t>=48&&57>=t?S(!0):(++ve,a(xn))}function l(){var t=de.charCodeAt(ve+1);return Se?(++ve,x()):61===t?w(kn,2):w(Cn,1)}function d(){var t=de.charCodeAt(ve+1);return 61===t?w(kn,2):w(En,1)}function f(t){var e=de.charCodeAt(ve+1);return e===t?w(124===t?In:An,2):61===e?w(kn,2):w(124===t?Ln:Tn,1)}function _(){var t=de.charCodeAt(ve+1);return 61===t?w(kn,2):w(On,1)}function g(t){var e=de.charCodeAt(ve+1);return e===t?w(Mn,2):61===e?w(kn,2):w(Pn,1)}function p(t){var e=de.charCodeAt(ve+1),n=1;return e===t?(n=62===t&&62===de.charCodeAt(ve+2)?3:2,61===de.charCodeAt(ve+n)?w(kn,n+1):w(Bn,n)):(61===e&&(n=61===de.charCodeAt(ve+2)?3:2),w(jn,n))}function v(t){var e=de.charCodeAt(ve+1);return 61===e?w(Dn,61===de.charCodeAt(ve+2)?3:2):w(61===t?Sn:zn,1)}function m(t){switch(t){case 46:return c();case 40:return++ve,a(pn);case 41:return++ve,a(vn);case 59:return++ve,a(yn);case 44:return++ve,a(mn);case 91:return++ve,a(dn);case 93:return++ve,a(fn);case 123:return++ve,a(_n);case 125:return++ve,a(gn);case 58:return++ve,a(wn);case 63:return++ve,a(bn);case 48:var e=de.charCodeAt(ve+1);if(120===e||88===e)return C();case 49:case 50:case 51:case 52:case 53:case 54:case 55:case 56:case 57:return S(!1);case 34:case 39:return k(t);case 47:return l(t);case 37:case 42:return d();case 124:case 38:return f(t);case 94:return _();case 43:case 45:return g(t);case 60:case 62:return p(t);case 61:case 33:return v(t);case 126:return w(zn,1)}return!1}function y(t){if(t?ve=me+1:me=ve,le.locations&&(we=new r),t)return x();if(ve>=fe)return a(Ne);var e=de.charCodeAt(ve);if(Kn(e)||92===e)return z();var i=m(e);if(i===!1){var s=String.fromCharCode(e);if("\\"===s||$n.test(s))return z();n(ve,"Unexpected character '"+s+"'")}return i}function w(t,e){var n=de.slice(ve,ve+e);ve+=e,a(t,n)}function x(){for(var t,e,i="",r=ve;;){ve>=fe&&n(r,"Unterminated regular expression");var s=de.charAt(ve);if(Wn.test(s)&&n(r,"Unterminated regular expression"),t)t=!1;else{if("["===s)e=!0;else if("]"===s&&e)e=!1;else if("/"===s&&!e)break;t="\\"===s}++ve}var i=de.slice(r,ve);++ve;var o=M();return o&&!/^[gmsiy]*$/.test(o)&&n(r,"Invalid regexp flag"),a(je,RegExp(i,o))}function b(t,e){for(var n=ve,i=0,r=0,s=null==e?1/0:e;s>r;++r){var a,o=de.charCodeAt(ve);if(a=o>=97?o-97+10:o>=65?o-65+10:o>=48&&57>=o?o-48:1/0,a>=t)break;++ve,i=i*t+a}return ve===n||null!=e&&ve-n!==e?null:i}function C(){ve+=2;var t=b(16);return null==t&&n(me+2,"Expected hexadecimal number"),Kn(de.charCodeAt(ve))&&n(ve,"Identifier directly after number"),a(De,t)}function S(t){var e=ve,i=!1,r=48===de.charCodeAt(ve);t||null!==b(10)||n(e,"Invalid number"),46===de.charCodeAt(ve)&&(++ve,b(10),i=!0);var s=de.charCodeAt(ve);(69===s||101===s)&&(s=de.charCodeAt(++ve),(43===s||45===s)&&++ve,null===b(10)&&n(e,"Invalid number"),i=!0),Kn(de.charCodeAt(ve))&&n(ve,"Identifier directly after number");var o,h=de.slice(e,ve);return i?o=parseFloat(h):r&&1!==h.length?/[89]/.test(h)||Oe?n(e,"Invalid number"):o=parseInt(h,8):o=parseInt(h,10),a(De,o)}function k(t){ve++;for(var e="";;){ve>=fe&&n(me,"Unterminated string constant");var i=de.charCodeAt(ve);if(i===t)return++ve,a(Be,e);if(92===i){i=de.charCodeAt(++ve);var r=/^[0-7]+/.exec(de.slice(ve,ve+3));for(r&&(r=r[0]);r&&parseInt(r,8)>255;)r=r.slice(0,r.length-1);if("0"===r&&(r=null),++ve,r)Oe&&n(ve-2,"Octal literal in strict mode"),e+=String.fromCharCode(parseInt(r,8)),ve+=r.length-1;else switch(i){case 110:e+="\n";break;case 114:e+="\r";break;case 120:e+=String.fromCharCode(P(2));break;case 117:e+=String.fromCharCode(P(4));break;case 85:e+=String.fromCharCode(P(8));break;case 116:e+="	";break;case 98:e+="\b";break;case 118:e+="";break;case 102:e+="\f";break;case 48:e+="\0";break;case 13:10===de.charCodeAt(ve)&&++ve;case 10:le.locations&&(Pe=ve,++ke);break;default:e+=String.fromCharCode(i)}}else(13===i||10===i||8232===i||8329===i)&&n(me,"Unterminated string constant"),e+=String.fromCharCode(i),++ve}}function P(t){var e=b(16,t);return null===e&&n(me,"Bad character escape sequence"),e}function M(){Fn=!1;for(var t,e=!0,i=ve;;){var r=de.charCodeAt(ve);if(Qn(r))Fn&&(t+=de.charAt(ve)),++ve;else{if(92!==r)break;Fn||(t=de.slice(i,ve)),Fn=!0,117!=de.charCodeAt(++ve)&&n(ve,"Expecting Unicode escape sequence \\uXXXX"),++ve;var s=P(4),a=String.fromCharCode(s);a||n(ve-1,"Invalid Unicode escape"),(e?Kn(s):Qn(s))||n(ve-4,"Invalid Unicode escape"),t+=a}e=!1}return Fn?t:de.slice(i,ve)}function z(){var t=M(),e=Ee;return Fn||(Zn(t)?e=ln[t]:(le.forbidReserved&&(3===le.ecmaVersion?Rn:qn)(t)||Oe&&Vn(t))&&n(me,"The keyword '"+t+"' is reserved")),a(e,t)}function I(){Me=me,ze=ye,Ie=xe,y()}function A(t){for(Oe=t,ve=ze;Pe>ve;)Pe=de.lastIndexOf("\n",Pe-2)+1,--ke;u(),y()}function L(){this.type=null,this.start=me,this.end=null}function O(){this.start=we,this.end=null,null!==_e&&(this.source=_e)}function T(){var t=new L;return le.locations&&(t.loc=new O),le.ranges&&(t.range=[me,0]),t}function D(t){var e=new L;return e.start=t.start,le.locations&&(e.loc=new O,e.loc.start=t.loc.start),le.ranges&&(e.range=[t.range[0],0]),e}function j(t,e){return t.type=e,t.end=ze,le.locations&&(t.loc.end=Ie),le.ranges&&(t.range[1]=ze),t}function B(t){return le.ecmaVersion>=5&&"ExpressionStatement"===t.type&&"Literal"===t.expression.type&&"use strict"===t.expression.value}function E(t){return be===t?(I(),!0):void 0}function N(){return!le.strictSemicolons&&(be===Ne||be===gn||Wn.test(de.slice(ze,me)))}function F(){E(yn)||N()||q()}function R(t){be===t?I():q()}function q(){n(me,"Unexpected token")}function V(t){"Identifier"!==t.type&&"MemberExpression"!==t.type&&n(t.start,"Assigning to rvalue"),Oe&&"Identifier"===t.type&&Hn(t.name)&&n(t.start,"Assigning to "+t.name+" in strict mode")}function H(t){Me=ze=ve,le.locations&&(Ie=new r),Ae=Oe=null,Le=[],y();var e=t||T(),n=!0;for(t||(e.body=[]);be!==Ne;){var i=Z();e.body.push(i),n&&B(i)&&A(!0),n=!1}return j(e,"Program")}function Z(){be===Cn&&y(!0);var t=be,e=T();switch(t){case Fe:case Ve:I();var i=t===Fe;E(yn)||N()?e.label=null:be!==Ee?q():(e.label=ce(),F());for(var r=0;r<Le.length;++r){var s=Le[r];if(null==e.label||s.name===e.label.name){if(null!=s.kind&&(i||"loop"===s.kind))break;if(e.label&&i)break}}return r===Le.length&&n(e.start,"Unsyntactic "+t.keyword),j(e,i?"BreakStatement":"ContinueStatement");case He:return I(),F(),j(e,"DebuggerStatement");case Ue:return I(),Le.push(ti),e.body=Z(),Le.pop(),R(nn),e.test=U(),F(),j(e,"DoWhileStatement");case $e:if(I(),Le.push(ti),R(pn),be===yn)return J(e,null);if(be===en){var a=T();return I(),G(a,!0),1===a.declarations.length&&E(cn)?$(e,a):J(e,a)}var a=W(!1,!0);return E(cn)?(V(a),$(e,a)):J(e,a);case Ge:return I(),he(e,!0);case We:return I(),e.test=U(),e.consequent=Z(),e.alternate=E(Xe)?Z():null,j(e,"IfStatement");case Ye:return Ae||n(me,"'return' outside of function"),I(),E(yn)||N()?e.argument=null:(e.argument=W(),F()),j(e,"ReturnStatement");case Ke:I(),e.discriminant=U(),e.cases=[],R(_n),Le.push(ei);for(var o,h;be!=gn;)if(be===Re||be===Ze){var u=be===Re;o&&j(o,"SwitchCase"),e.cases.push(o=T()),o.consequent=[],I(),u?o.test=W():(h&&n(Me,"Multiple default clauses"),h=!0,o.test=null),R(wn)}else o||q(),o.consequent.push(Z());return o&&j(o,"SwitchCase"),I(),Le.pop(),j(e,"SwitchStatement");case Qe:return I(),Wn.test(de.slice(ze,me))&&n(ze,"Illegal newline after throw"),e.argument=W(),F(),j(e,"ThrowStatement");case tn:if(I(),e.block=X(),e.handler=null,be===qe){var c=T();I(),R(pn),c.param=ce(),Oe&&Hn(c.param.name)&&n(c.param.start,"Binding "+c.param.name+" in strict mode"),R(vn),c.guard=null,c.body=X(),e.handler=j(c,"CatchClause")}return e.guardedHandlers=Te,e.finalizer=E(Je)?X():null,e.handler||e.finalizer||n(e.start,"Missing catch or finally clause"),j(e,"TryStatement");case en:return I(),e=G(e),F(),e;case nn:return I(),e.test=U(),Le.push(ti),e.body=Z(),Le.pop(),j(e,"WhileStatement");case rn:return Oe&&n(me,"'with' in strict mode"),I(),e.object=U(),e.body=Z(),j(e,"WithStatement");case _n:return X();case yn:return I(),j(e,"EmptyStatement");default:var l=Ce,d=W();if(t===Ee&&"Identifier"===d.type&&E(wn)){for(var r=0;r<Le.length;++r)Le[r].name===l&&n(d.start,"Label '"+l+"' is already declared");var f=be.isLoop?"loop":be===Ke?"switch":null;return Le.push({name:l,kind:f}),e.body=Z(),Le.pop(),e.label=d,j(e,"LabeledStatement")}return e.expression=d,F(),j(e,"ExpressionStatement")}}function U(){R(pn);var t=W();return R(vn),t}function X(t){var e,n=T(),i=!0,r=!1;for(n.body=[],R(_n);!E(gn);){var s=Z();n.body.push(s),i&&t&&B(s)&&(e=r,A(r=!0)),i=!1}return r&&!e&&A(!1),j(n,"BlockStatement")}function J(t,e){return t.init=e,R(yn),t.test=be===yn?null:W(),R(yn),t.update=be===vn?null:W(),R(vn),t.body=Z(),Le.pop(),j(t,"ForStatement")}function $(t,e){return t.left=e,t.right=W(),R(vn),t.body=Z(),Le.pop(),j(t,"ForInStatement")}function G(t,e){for(t.declarations=[],t.kind="var";;){var i=T();if(i.id=ce(),Oe&&Hn(i.id.name)&&n(i.id.start,"Binding "+i.id.name+" in strict mode"),i.init=E(Sn)?W(!0,e):null,t.declarations.push(j(i,"VariableDeclarator")),!E(mn))break}return j(t,"VariableDeclaration")}function W(t,e){var n=Y(e);if(!t&&be===mn){var i=D(n);for(i.expressions=[n];E(mn);)i.expressions.push(Y(e));return j(i,"SequenceExpression")}return n}function Y(t){var e=K(t);if(be.isAssign){var n=D(e);return n.operator=Ce,n.left=e,I(),n.right=Y(t),V(e),j(n,"AssignmentExpression")}return e}function K(t){var e=Q(t);if(E(bn)){var n=D(e);return n.test=e,n.consequent=W(!0),R(wn),n.alternate=W(!0,t),j(n,"ConditionalExpression")}return e}function Q(t){return te(ee(),-1,t)}function te(t,e,n){var i=be.binop;if(null!=i&&(!n||be!==cn)&&i>e){var r=D(t);r.left=t,r.operator=Ce,I(),r.right=te(ee(),i,n);var r=j(r,/&&|\|\|/.test(r.operator)?"LogicalExpression":"BinaryExpression");return te(r,e,n)}return t}function ee(){if(be.prefix){var t=T(),e=be.isUpdate;return t.operator=Ce,t.prefix=!0,I(),t.argument=ee(),e?V(t.argument):Oe&&"delete"===t.operator&&"Identifier"===t.argument.type&&n(t.start,"Deleting local variable in strict mode"),j(t,e?"UpdateExpression":"UnaryExpression")}for(var i=ne();be.postfix&&!N();){var t=D(i);t.operator=Ce,t.prefix=!1,t.argument=i,V(i),I(),i=j(t,"UpdateExpression")}return i}function ne(){return ie(re())}function ie(t,e){if(E(xn)){var n=D(t);return n.object=t,n.property=ce(!0),n.computed=!1,ie(j(n,"MemberExpression"),e)}if(E(dn)){var n=D(t);return n.object=t,n.property=W(),n.computed=!0,R(fn),ie(j(n,"MemberExpression"),e)}if(!e&&E(pn)){var n=D(t);return n.callee=t,n.arguments=ue(vn,!1),ie(j(n,"CallExpression"),e)}return t}function re(){switch(be){case an:var t=T();return I(),j(t,"ThisExpression");case Ee:return ce();case De:case Be:case je:var t=T();return t.value=Ce,t.raw=de.slice(me,ye),I(),j(t,"Literal");case on:case hn:case un:var t=T();return t.value=be.atomValue,t.raw=be.keyword,I(),j(t,"Literal");case pn:var e=we,n=me;I();var i=W();return i.start=n,i.end=ye,le.locations&&(i.loc.start=e,i.loc.end=xe),le.ranges&&(i.range=[n,ye]),R(vn),i;case dn:var t=T();return I(),t.elements=ue(fn,!0,!0),j(t,"ArrayExpression");case _n:return ae();case Ge:var t=T();return I(),he(t,!1);case sn:return se();default:q()}}function se(){var t=T();return I(),t.callee=ie(re(),!0),t.arguments=E(pn)?ue(vn,!1):Te,j(t,"NewExpression")}function ae(){var t=T(),e=!0,i=!1;for(t.properties=[],I();!E(gn);){if(e)e=!1;else if(R(mn),le.allowTrailingCommas&&E(gn))break;var r,s={key:oe()},a=!1;if(E(wn)?(s.value=W(!0),r=s.kind="init"):le.ecmaVersion>=5&&"Identifier"===s.key.type&&("get"===s.key.name||"set"===s.key.name)?(a=i=!0,r=s.kind=s.key.name,s.key=oe(),be!==pn&&q(),s.value=he(T(),!1)):q(),"Identifier"===s.key.type&&(Oe||i))for(var o=0;o<t.properties.length;++o){var h=t.properties[o];if(h.key.name===s.key.name){var u=r==h.kind||a&&"init"===h.kind||"init"===r&&("get"===h.kind||"set"===h.kind);u&&!Oe&&"init"===r&&"init"===h.kind&&(u=!1),u&&n(s.key.start,"Redefinition of property")}}t.properties.push(s)}return j(t,"ObjectExpression")}function oe(){return be===De||be===Be?re():ce(!0)}function he(t,e){be===Ee?t.id=ce():e?q():t.id=null,t.params=[];var i=!0;for(R(pn);!E(vn);)i?i=!1:R(mn),t.params.push(ce());var r=Ae,s=Le;if(Ae=!0,Le=[],t.body=X(!0),Ae=r,Le=s,Oe||t.body.body.length&&B(t.body.body[0]))for(var a=t.id?-1:0;a<t.params.length;++a){var o=0>a?t.id:t.params[a];if((Vn(o.name)||Hn(o.name))&&n(o.start,"Defining '"+o.name+"' in strict mode"),a>=0)for(var h=0;a>h;++h)o.name===t.params[h].name&&n(o.start,"Argument name clash in strict mode")}return j(t,e?"FunctionDeclaration":"FunctionExpression")}function ue(t,e,n){for(var i=[],r=!0;!E(t);){if(r)r=!1;else if(R(mn),e&&le.allowTrailingCommas&&E(t))break;n&&be===mn?i.push(null):i.push(W(!0))}return i}function ce(t){var e=T();return e.name=be===Ee?Ce:t&&!le.forbidReserved&&be.keyword||q(),I(),j(e,"Identifier")}t.version="0.3.2";var le,de,fe,_e;t.parse=function(t,n){return de=t+"",fe=de.length,e(n),s(),H(le.program)};var ge=t.defaultOptions={ecmaVersion:5,strictSemicolons:!1,allowTrailingCommas:!0,forbidReserved:!1,locations:!1,onComment:null,ranges:!1,program:null,sourceFile:null},pe=t.getLineInfo=function(t,e){for(var n=1,i=0;;){Yn.lastIndex=i;var r=Yn.exec(t);if(!(r&&r.index<e))break;++n,i=r.index+r[0].length}return{line:n,column:e-i}};t.tokenize=function(t,n){function i(t){return y(t),r.start=me,r.end=ye,r.startLoc=we,r.endLoc=xe,r.type=be,r.value=Ce,r}de=t+"",fe=de.length,e(n),s();var r={};return i.jumpTo=function(t,e){if(ve=t,le.locations){ke=1,Pe=Yn.lastIndex=0;for(var n;(n=Yn.exec(de))&&n.index<t;)++ke,Pe=n.index+n[0].length}Se=e,u()},i};var ve,me,ye,we,xe,be,Ce,Se,ke,Pe,Me,ze,Ie,Ae,Le,Oe,Te=[],De={type:"num"},je={type:"regexp"},Be={type:"string"},Ee={type:"name"},Ne={type:"eof"},Fe={keyword:"break"},Re={keyword:"case",beforeExpr:!0},qe={keyword:"catch"},Ve={keyword:"continue"},He={keyword:"debugger"},Ze={keyword:"default"},Ue={keyword:"do",isLoop:!0},Xe={keyword:"else",beforeExpr:!0},Je={keyword:"finally"},$e={keyword:"for",isLoop:!0},Ge={keyword:"function"},We={keyword:"if"},Ye={keyword:"return",beforeExpr:!0},Ke={keyword:"switch"},Qe={keyword:"throw",beforeExpr:!0},tn={keyword:"try"},en={keyword:"var"},nn={keyword:"while",isLoop:!0},rn={keyword:"with"},sn={keyword:"new",beforeExpr:!0},an={keyword:"this"},on={keyword:"null",atomValue:null},hn={keyword:"true",atomValue:!0},un={keyword:"false",atomValue:!1},cn={keyword:"in",binop:7,beforeExpr:!0},ln={"break":Fe,"case":Re,"catch":qe,"continue":Ve,"debugger":He,"default":Ze,"do":Ue,"else":Xe,"finally":Je,"for":$e,"function":Ge,"if":We,"return":Ye,"switch":Ke,"throw":Qe,"try":tn,"var":en,"while":nn,"with":rn,"null":on,"true":hn,"false":un,"new":sn,"in":cn,"instanceof":{keyword:"instanceof",binop:7,beforeExpr:!0},"this":an,"typeof":{keyword:"typeof",prefix:!0,beforeExpr:!0},"void":{keyword:"void",prefix:!0,beforeExpr:!0},"delete":{keyword:"delete",prefix:!0,beforeExpr:!0}},dn={type:"[",beforeExpr:!0},fn={type:"]"},_n={type:"{",beforeExpr:!0},gn={type:"}"},pn={type:"(",beforeExpr:!0},vn={type:")"},mn={type:",",beforeExpr:!0},yn={type:";",beforeExpr:!0},wn={type:":",beforeExpr:!0},xn={type:"."},bn={type:"?",beforeExpr:!0},Cn={binop:10,beforeExpr:!0},Sn={isAssign:!0,beforeExpr:!0},kn={isAssign:!0,beforeExpr:!0},Pn={binop:9,prefix:!0,beforeExpr:!0},Mn={postfix:!0,prefix:!0,isUpdate:!0},zn={prefix:!0,beforeExpr:!0},In={binop:1,beforeExpr:!0},An={binop:2,beforeExpr:!0},Ln={binop:3,beforeExpr:!0},On={binop:4,beforeExpr:!0},Tn={binop:5,beforeExpr:!0},Dn={binop:6,beforeExpr:!0},jn={binop:7,beforeExpr:!0},Bn={binop:8,beforeExpr:!0},En={binop:10,beforeExpr:!0};t.tokTypes={bracketL:dn,bracketR:fn,braceL:_n,braceR:gn,parenL:pn,parenR:vn,comma:mn,semi:yn,colon:wn,dot:xn,question:bn,slash:Cn,eq:Sn,name:Ee,eof:Ne,num:De,regexp:je,string:Be};for(var Nn in ln)t.tokTypes["_"+Nn]=ln[Nn];var Fn,Rn=i("abstract boolean byte char class double enum export extends final float goto implements import int interface long native package private protected public short static super synchronized throws transient volatile"),qn=i("class enum extends super const export import"),Vn=i("implements interface let package private protected public static yield"),Hn=i("eval arguments"),Zn=i("break case catch continue debugger default do else finally for function if return switch throw try var while with null true false instanceof typeof void delete new in this"),Un=/[\u1680\u180e\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]/,Xn="\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0370-\u0374\u0376\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u048a-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05d0-\u05ea\u05f0-\u05f2\u0620-\u064a\u066e\u066f\u0671-\u06d3\u06d5\u06e5\u06e6\u06ee\u06ef\u06fa-\u06fc\u06ff\u0710\u0712-\u072f\u074d-\u07a5\u07b1\u07ca-\u07ea\u07f4\u07f5\u07fa\u0800-\u0815\u081a\u0824\u0828\u0840-\u0858\u08a0\u08a2-\u08ac\u0904-\u0939\u093d\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097f\u0985-\u098c\u098f\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bd\u09ce\u09dc\u09dd\u09df-\u09e1\u09f0\u09f1\u0a05-\u0a0a\u0a0f\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32\u0a33\u0a35\u0a36\u0a38\u0a39\u0a59-\u0a5c\u0a5e\u0a72-\u0a74\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2\u0ab3\u0ab5-\u0ab9\u0abd\u0ad0\u0ae0\u0ae1\u0b05-\u0b0c\u0b0f\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32\u0b33\u0b35-\u0b39\u0b3d\u0b5c\u0b5d\u0b5f-\u0b61\u0b71\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99\u0b9a\u0b9c\u0b9e\u0b9f\u0ba3\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bd0\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d\u0c58\u0c59\u0c60\u0c61\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbd\u0cde\u0ce0\u0ce1\u0cf1\u0cf2\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d3a\u0d3d\u0d4e\u0d60\u0d61\u0d7a-\u0d7f\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0e01-\u0e30\u0e32\u0e33\u0e40-\u0e46\u0e81\u0e82\u0e84\u0e87\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa\u0eab\u0ead-\u0eb0\u0eb2\u0eb3\u0ebd\u0ec0-\u0ec4\u0ec6\u0edc-\u0edf\u0f00\u0f40-\u0f47\u0f49-\u0f6c\u0f88-\u0f8c\u1000-\u102a\u103f\u1050-\u1055\u105a-\u105d\u1061\u1065\u1066\u106e-\u1070\u1075-\u1081\u108e\u10a0-\u10c5\u10c7\u10cd\u10d0-\u10fa\u10fc-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u167f\u1681-\u169a\u16a0-\u16ea\u16ee-\u16f0\u1700-\u170c\u170e-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176c\u176e-\u1770\u1780-\u17b3\u17d7\u17dc\u1820-\u1877\u1880-\u18a8\u18aa\u18b0-\u18f5\u1900-\u191c\u1950-\u196d\u1970-\u1974\u1980-\u19ab\u19c1-\u19c7\u1a00-\u1a16\u1a20-\u1a54\u1aa7\u1b05-\u1b33\u1b45-\u1b4b\u1b83-\u1ba0\u1bae\u1baf\u1bba-\u1be5\u1c00-\u1c23\u1c4d-\u1c4f\u1c5a-\u1c7d\u1ce9-\u1cec\u1cee-\u1cf1\u1cf5\u1cf6\u1d00-\u1dbf\u1e00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u2071\u207f\u2090-\u209c\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2160-\u2188\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2ce4\u2ceb-\u2cee\u2cf2\u2cf3\u2d00-\u2d25\u2d27\u2d2d\u2d30-\u2d67\u2d6f\u2d80-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2e2f\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303c\u3041-\u3096\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31ba\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fcc\ua000-\ua48c\ua4d0-\ua4fd\ua500-\ua60c\ua610-\ua61f\ua62a\ua62b\ua640-\ua66e\ua67f-\ua697\ua6a0-\ua6ef\ua717-\ua71f\ua722-\ua788\ua78b-\ua78e\ua790-\ua793\ua7a0-\ua7aa\ua7f8-\ua801\ua803-\ua805\ua807-\ua80a\ua80c-\ua822\ua840-\ua873\ua882-\ua8b3\ua8f2-\ua8f7\ua8fb\ua90a-\ua925\ua930-\ua946\ua960-\ua97c\ua984-\ua9b2\ua9cf\uaa00-\uaa28\uaa40-\uaa42\uaa44-\uaa4b\uaa60-\uaa76\uaa7a\uaa80-\uaaaf\uaab1\uaab5\uaab6\uaab9-\uaabd\uaac0\uaac2\uaadb-\uaadd\uaae0-\uaaea\uaaf2-\uaaf4\uab01-\uab06\uab09-\uab0e\uab11-\uab16\uab20-\uab26\uab28-\uab2e\uabc0-\uabe2\uac00-\ud7a3\ud7b0-\ud7c6\ud7cb-\ud7fb\uf900-\ufa6d\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d\ufb1f-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40\ufb41\ufb43\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe70-\ufe74\ufe76-\ufefc\uff21-\uff3a\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc",Jn="\u0300-\u036f\u0483-\u0487\u0591-\u05bd\u05bf\u05c1\u05c2\u05c4\u05c5\u05c7\u0610-\u061a\u0620-\u0649\u0672-\u06d3\u06e7-\u06e8\u06fb-\u06fc\u0730-\u074a\u0800-\u0814\u081b-\u0823\u0825-\u0827\u0829-\u082d\u0840-\u0857\u08e4-\u08fe\u0900-\u0903\u093a-\u093c\u093e-\u094f\u0951-\u0957\u0962-\u0963\u0966-\u096f\u0981-\u0983\u09bc\u09be-\u09c4\u09c7\u09c8\u09d7\u09df-\u09e0\u0a01-\u0a03\u0a3c\u0a3e-\u0a42\u0a47\u0a48\u0a4b-\u0a4d\u0a51\u0a66-\u0a71\u0a75\u0a81-\u0a83\u0abc\u0abe-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ae2-\u0ae3\u0ae6-\u0aef\u0b01-\u0b03\u0b3c\u0b3e-\u0b44\u0b47\u0b48\u0b4b-\u0b4d\u0b56\u0b57\u0b5f-\u0b60\u0b66-\u0b6f\u0b82\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0bd7\u0be6-\u0bef\u0c01-\u0c03\u0c46-\u0c48\u0c4a-\u0c4d\u0c55\u0c56\u0c62-\u0c63\u0c66-\u0c6f\u0c82\u0c83\u0cbc\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cd5\u0cd6\u0ce2-\u0ce3\u0ce6-\u0cef\u0d02\u0d03\u0d46-\u0d48\u0d57\u0d62-\u0d63\u0d66-\u0d6f\u0d82\u0d83\u0dca\u0dcf-\u0dd4\u0dd6\u0dd8-\u0ddf\u0df2\u0df3\u0e34-\u0e3a\u0e40-\u0e45\u0e50-\u0e59\u0eb4-\u0eb9\u0ec8-\u0ecd\u0ed0-\u0ed9\u0f18\u0f19\u0f20-\u0f29\u0f35\u0f37\u0f39\u0f41-\u0f47\u0f71-\u0f84\u0f86-\u0f87\u0f8d-\u0f97\u0f99-\u0fbc\u0fc6\u1000-\u1029\u1040-\u1049\u1067-\u106d\u1071-\u1074\u1082-\u108d\u108f-\u109d\u135d-\u135f\u170e-\u1710\u1720-\u1730\u1740-\u1750\u1772\u1773\u1780-\u17b2\u17dd\u17e0-\u17e9\u180b-\u180d\u1810-\u1819\u1920-\u192b\u1930-\u193b\u1951-\u196d\u19b0-\u19c0\u19c8-\u19c9\u19d0-\u19d9\u1a00-\u1a15\u1a20-\u1a53\u1a60-\u1a7c\u1a7f-\u1a89\u1a90-\u1a99\u1b46-\u1b4b\u1b50-\u1b59\u1b6b-\u1b73\u1bb0-\u1bb9\u1be6-\u1bf3\u1c00-\u1c22\u1c40-\u1c49\u1c5b-\u1c7d\u1cd0-\u1cd2\u1d00-\u1dbe\u1e01-\u1f15\u200c\u200d\u203f\u2040\u2054\u20d0-\u20dc\u20e1\u20e5-\u20f0\u2d81-\u2d96\u2de0-\u2dff\u3021-\u3028\u3099\u309a\ua640-\ua66d\ua674-\ua67d\ua69f\ua6f0-\ua6f1\ua7f8-\ua800\ua806\ua80b\ua823-\ua827\ua880-\ua881\ua8b4-\ua8c4\ua8d0-\ua8d9\ua8f3-\ua8f7\ua900-\ua909\ua926-\ua92d\ua930-\ua945\ua980-\ua983\ua9b3-\ua9c0\uaa00-\uaa27\uaa40-\uaa41\uaa4c-\uaa4d\uaa50-\uaa59\uaa7b\uaae0-\uaae9\uaaf2-\uaaf3\uabc0-\uabe1\uabec\uabed\uabf0-\uabf9\ufb20-\ufb28\ufe00-\ufe0f\ufe20-\ufe26\ufe33\ufe34\ufe4d-\ufe4f\uff10-\uff19\uff3f",$n=RegExp("["+Xn+"]"),Gn=RegExp("["+Xn+Jn+"]"),Wn=/[\n\r\u2028\u2029]/,Yn=/\r\n|[\n\r\u2028\u2029]/g,Kn=t.isIdentifierStart=function(t){return 65>t?36===t:91>t?!0:97>t?95===t:123>t?!0:t>=170&&$n.test(String.fromCharCode(t))},Qn=t.isIdentifierChar=function(t){return 48>t?36===t:58>t?!0:65>t?!1:91>t?!0:97>t?95===t:123>t?!0:t>=170&&Gn.test(String.fromCharCode(t))},ti={kind:"loop"},ei={kind:"switch"}});var binaryOperators={"+":"_add","-":"_subtract","*":"_multiply","/":"_divide","%":"_modulo","==":"equals","!=":"equals"},unaryOperators={"-":"_negate","+":null},fields=Base.each("add,subtract,multiply,divide,modulo,negate".split(","),function(t){this["_"+t]="#"+t},{});return paper.Point.inject(fields),paper.Size.inject(fields),paper.Color.inject(fields),"complete"===document.readyState?setTimeout(load):paper.DomEvent.add(window,{load:load}),{compile:compile,evaluate:evaluate,load:load}}(this);
 })()
-},{}],12:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
+var page = require('page');
+
+var AppView= require('./views/app');
+var StrategieView = require('./views/strategie');
+var UsersView = require('./views/users');
+var Users = require('./models/users');
+var XHR = require('./lib/xhr');
+
+var currentView = null;
+
+function clean(ctx, next) {
+    if (currentView) {
+        currentView.destroy.call(currentView);
+        next();
+    }
+}
+
+function transition(ctx, next) {
+    next();
+}
+
+function index(ctx) {
+    currentView = new AppView('#app-wrapper');
+    currentView.render();
+}
+
+function combis(ctx) {
+    var xhr = new XHR();
+    currentView = new StrategieView('#content');
+    xhr.get('/combis').success(function(data) {
+        if (data.length > 0)
+            currentView.setModel(JSON.parse(data));
+        else
+            currentView.setModel();
+    }).send();
+}
+
+function users(ctx) {
+    currentView = new UsersView('#content', Users.all());
+}
+
+page('/', index);
+page('/_combis', combis);
+page('/_users', users);
+page('*', transition);
+page('*', clean);
+page();
+},{"./views/app":1,"./views/strategie":6,"./views/users":4,"./models/users":10,"./lib/xhr":5,"page":11}],11:[function(require,module,exports){
+
+;(function(){
+
+  /**
+   * Perform initial dispatch.
+   */
+
+  var dispatch = true;
+
+  /**
+   * Base path.
+   */
+
+  var base = '';
+
+  /**
+   * Running flag.
+   */
+
+  var running;
+
+  /**
+   * Register `path` with callback `fn()`,
+   * or route `path`, or `page.start()`.
+   *
+   *   page(fn);
+   *   page('*', fn);
+   *   page('/user/:id', load, user);
+   *   page('/user/' + user.id, { some: 'thing' });
+   *   page('/user/' + user.id);
+   *   page();
+   *
+   * @param {String|Function} path
+   * @param {Function} fn...
+   * @api public
+   */
+
+  function page(path, fn) {
+    // <callback>
+    if ('function' == typeof path) {
+      return page('*', path);
+    }
+
+    // route <path> to <callback ...>
+    if ('function' == typeof fn) {
+      var route = new Route(path);
+      for (var i = 1; i < arguments.length; ++i) {
+        page.callbacks.push(route.middleware(arguments[i]));
+      }
+    // show <path> with [state]
+    } else if ('string' == typeof path) {
+      page.show(path, fn);
+    // start [options]
+    } else {
+      page.start(path);
+    }
+  }
+
+  /**
+   * Callback functions.
+   */
+
+  page.callbacks = [];
+
+  /**
+   * Get or set basepath to `path`.
+   *
+   * @param {String} path
+   * @api public
+   */
+
+  page.base = function(path){
+    if (0 == arguments.length) return base;
+    base = path;
+  };
+
+  /**
+   * Bind with the given `options`.
+   *
+   * Options:
+   *
+   *    - `click` bind to click events [true]
+   *    - `popstate` bind to popstate [true]
+   *    - `dispatch` perform initial dispatch [true]
+   *
+   * @param {Object} options
+   * @api public
+   */
+
+  page.start = function(options){
+    options = options || {};
+    if (running) return;
+    running = true;
+    if (false === options.dispatch) dispatch = false;
+    if (false !== options.popstate) window.addEventListener('popstate', onpopstate, false);
+    if (false !== options.click) window.addEventListener('click', onclick, false);
+    if (!dispatch) return;
+    var url = location.pathname + location.search + location.hash;
+    page.replace(url, null, true, dispatch);
+  };
+
+  /**
+   * Unbind click and popstate event handlers.
+   *
+   * @api public
+   */
+
+  page.stop = function(){
+    running = false;
+    removeEventListener('click', onclick, false);
+    removeEventListener('popstate', onpopstate, false);
+  };
+
+  /**
+   * Show `path` with optional `state` object.
+   *
+   * @param {String} path
+   * @param {Object} state
+   * @param {Boolean} dispatch
+   * @return {Context}
+   * @api public
+   */
+
+  page.show = function(path, state, dispatch){
+    var ctx = new Context(path, state);
+    if (false !== dispatch) page.dispatch(ctx);
+    if (!ctx.unhandled) ctx.pushState();
+    return ctx;
+  };
+
+  /**
+   * Replace `path` with optional `state` object.
+   *
+   * @param {String} path
+   * @param {Object} state
+   * @return {Context}
+   * @api public
+   */
+
+  page.replace = function(path, state, init, dispatch){
+    var ctx = new Context(path, state);
+    ctx.init = init;
+    if (null == dispatch) dispatch = true;
+    if (dispatch) page.dispatch(ctx);
+    ctx.save();
+    return ctx;
+  };
+
+  /**
+   * Dispatch the given `ctx`.
+   *
+   * @param {Object} ctx
+   * @api private
+   */
+
+  page.dispatch = function(ctx){
+    var i = 0;
+
+    function next() {
+      var fn = page.callbacks[i++];
+      if (!fn) return unhandled(ctx);
+      fn(ctx, next);
+    }
+
+    next();
+  };
+
+  /**
+   * Unhandled `ctx`. When it's not the initial
+   * popstate then redirect. If you wish to handle
+   * 404s on your own use `page('*', callback)`.
+   *
+   * @param {Context} ctx
+   * @api private
+   */
+
+  function unhandled(ctx) {
+    var current = window.location.pathname + window.location.search;
+    if (current == ctx.canonicalPath) return;
+    page.stop();
+    ctx.unhandled = true;
+    window.location = ctx.canonicalPath;
+  }
+
+  /**
+   * Initialize a new "request" `Context`
+   * with the given `path` and optional initial `state`.
+   *
+   * @param {String} path
+   * @param {Object} state
+   * @api public
+   */
+
+  function Context(path, state) {
+    if ('/' == path[0] && 0 != path.indexOf(base)) path = base + path;
+    var i = path.indexOf('?');
+
+    this.canonicalPath = path;
+    this.path = path.replace(base, '') || '/';
+
+    this.title = document.title;
+    this.state = state || {};
+    this.state.path = path;
+    this.querystring = ~i ? path.slice(i + 1) : '';
+    this.pathname = ~i ? path.slice(0, i) : path;
+    this.params = [];
+
+    // fragment
+    this.hash = '';
+    if (!~this.path.indexOf('#')) return;
+    var parts = this.path.split('#');
+    this.path = parts[0];
+    this.hash = parts[1] || '';
+    this.querystring = this.querystring.split('#')[0];
+  }
+
+  /**
+   * Expose `Context`.
+   */
+
+  page.Context = Context;
+
+  /**
+   * Push state.
+   *
+   * @api private
+   */
+
+  Context.prototype.pushState = function(){
+    history.pushState(this.state, this.title, this.canonicalPath);
+  };
+
+  /**
+   * Save the context state.
+   *
+   * @api public
+   */
+
+  Context.prototype.save = function(){
+    history.replaceState(this.state, this.title, this.canonicalPath);
+  };
+
+  /**
+   * Initialize `Route` with the given HTTP `path`,
+   * and an array of `callbacks` and `options`.
+   *
+   * Options:
+   *
+   *   - `sensitive`    enable case-sensitive routes
+   *   - `strict`       enable strict matching for trailing slashes
+   *
+   * @param {String} path
+   * @param {Object} options.
+   * @api private
+   */
+
+  function Route(path, options) {
+    options = options || {};
+    this.path = path;
+    this.method = 'GET';
+    this.regexp = pathtoRegexp(path
+      , this.keys = []
+      , options.sensitive
+      , options.strict);
+  }
+
+  /**
+   * Expose `Route`.
+   */
+
+  page.Route = Route;
+
+  /**
+   * Return route middleware with
+   * the given callback `fn()`.
+   *
+   * @param {Function} fn
+   * @return {Function}
+   * @api public
+   */
+
+  Route.prototype.middleware = function(fn){
+    var self = this;
+    return function(ctx, next){
+      if (self.match(ctx.path, ctx.params)) return fn(ctx, next);
+      next();
+    };
+  };
+
+  /**
+   * Check if this route matches `path`, if so
+   * populate `params`.
+   *
+   * @param {String} path
+   * @param {Array} params
+   * @return {Boolean}
+   * @api private
+   */
+
+  Route.prototype.match = function(path, params){
+    var keys = this.keys
+      , qsIndex = path.indexOf('?')
+      , pathname = ~qsIndex ? path.slice(0, qsIndex) : path
+      , m = this.regexp.exec(pathname);
+
+    if (!m) return false;
+
+    for (var i = 1, len = m.length; i < len; ++i) {
+      var key = keys[i - 1];
+
+      var val = 'string' == typeof m[i]
+        ? decodeURIComponent(m[i])
+        : m[i];
+
+      if (key) {
+        params[key.name] = undefined !== params[key.name]
+          ? params[key.name]
+          : val;
+      } else {
+        params.push(val);
+      }
+    }
+
+    return true;
+  };
+
+  /**
+   * Normalize the given path string,
+   * returning a regular expression.
+   *
+   * An empty array should be passed,
+   * which will contain the placeholder
+   * key names. For example "/user/:id" will
+   * then contain ["id"].
+   *
+   * @param  {String|RegExp|Array} path
+   * @param  {Array} keys
+   * @param  {Boolean} sensitive
+   * @param  {Boolean} strict
+   * @return {RegExp}
+   * @api private
+   */
+
+  function pathtoRegexp(path, keys, sensitive, strict) {
+    if (path instanceof RegExp) return path;
+    if (path instanceof Array) path = '(' + path.join('|') + ')';
+    path = path
+      .concat(strict ? '' : '/?')
+      .replace(/\/\(/g, '(?:/')
+      .replace(/(\/)?(\.)?:(\w+)(?:(\(.*?\)))?(\?)?/g, function(_, slash, format, key, capture, optional){
+        keys.push({ name: key, optional: !! optional });
+        slash = slash || '';
+        return ''
+          + (optional ? '' : slash)
+          + '(?:'
+          + (optional ? slash : '')
+          + (format || '') + (capture || (format && '([^/.]+?)' || '([^/]+?)')) + ')'
+          + (optional || '');
+      })
+      .replace(/([\/.])/g, '\\$1')
+      .replace(/\*/g, '(.*)');
+    return new RegExp('^' + path + '$', sensitive ? '' : 'i');
+  }
+
+  /**
+   * Handle "populate" events.
+   */
+
+  function onpopstate(e) {
+    if (e.state) {
+      var path = e.state.path;
+      page.replace(path, e.state);
+    }
+  }
+
+  /**
+   * Handle "click" events.
+   */
+
+  function onclick(e) {
+    if (1 != which(e)) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+    if (e.defaultPrevented) return;
+
+    // ensure link
+    var el = e.target;
+    while (el && 'A' != el.nodeName) el = el.parentNode;
+    if (!el || 'A' != el.nodeName) return;
+
+    // ensure non-hash for the same path
+    var link = el.getAttribute('href');
+    if (el.pathname == location.pathname && (el.hash || '#' == link)) return;
+
+    // check target
+    if (el.target) return;
+
+    // x-origin
+    if (!sameOrigin(el.href)) return;
+
+    // rebuild path
+    var path = el.pathname + el.search + (el.hash || '');
+
+    // same page
+    var orig = path + el.hash;
+
+    path = path.replace(base, '');
+    if (base && orig == path) return;
+
+    e.preventDefault();
+    page.show(orig);
+  }
+
+  /**
+   * Event button.
+   */
+
+  function which(e) {
+    e = e || window.event;
+    return null == e.which
+      ? e.button
+      : e.which;
+  }
+
+  /**
+   * Check if `href` is the same origin.
+   */
+
+  function sameOrigin(href) {
+    var origin = location.protocol + '//' + location.hostname;
+    if (location.port) origin += ':' + location.port;
+    return 0 == href.indexOf(origin);
+  }
+
+  /**
+   * Expose `page`.
+   */
+
+  if ('undefined' == typeof module) {
+    window.page = page;
+  } else {
+    module.exports = page;
+  }
+
+})();
+
+},{}],8:[function(require,module,exports){
 var Paper = require('./paper-full.min.js').exports;
 var _ = require('./underscore-1.5.2.js');
 
@@ -686,7 +961,11 @@ Terrain.prototype.draw = function() {
 
     this.placePlayers();
 
-    this.getItemByName('ball').position = this.getItemByName('t1DC').position.subtract(new Paper.Point(15, 0));
+    this.placeBall();
+};
+
+Terrain.prototype.placeBall = function () {
+    this.getItemByName('ball').position = this.getItemByName('t1DC').position.subtract(new Paper.Point(15, 0))
 };
 
 Terrain.prototype.placePlayers = function() {
@@ -918,19 +1197,2038 @@ function renderTerrain(x, y, longueur, largeur) {
 module.exports = Terrain;
 
 
-},{"./paper-full.min.js":11,"./underscore-1.5.2.js":9}],10:[function(require,module,exports){
-var Model = require('../Model').Model;
+},{"./paper-full.min.js":7,"./underscore-1.5.2.js":3}],10:[function(require,module,exports){
+var Q = require('q');
+var XHR = require('../lib/xhr');
 
-Joueur.prototype = new Model();
-Joueur.constructor = Joueur;
-function Joueur(properties) {
-    for (var prop in properties) {
-        this[prop] = properties[prop];
+function Users(users) {
+    this.models = users || [];
+}
+
+Users.all = function() {
+    var deferred = Q.defer();
+
+    var xhr = new XHR();
+    xhr.get('/users')
+        .success(function(data) {
+            deferred.resolve(new Users(JSON.parse(data)));
+        })
+        .send();
+
+
+    return deferred.promise;
+};
+
+Users.prototype.add = function(user) {
+    var deferred = Q.defer();
+
+    var xhr = new XHR();
+    xhr.post('/users')
+        .header('Content-Type', 'application/json')
+        .success(function(data) {
+            deferred.resolve(data);
+        })
+        .send(user);
+
+    return deferred.promise;
+};
+
+module.exports = Users;
+},{"../lib/xhr":5,"q":12}],13:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+
+process.nextTick = (function () {
+    var canSetImmediate = typeof window !== 'undefined'
+    && window.setImmediate;
+    var canPost = typeof window !== 'undefined'
+    && window.postMessage && window.addEventListener
+    ;
+
+    if (canSetImmediate) {
+        return function (f) { return window.setImmediate(f) };
+    }
+
+    if (canPost) {
+        var queue = [];
+        window.addEventListener('message', function (ev) {
+            if (ev.source === window && ev.data === 'process-tick') {
+                ev.stopPropagation();
+                if (queue.length > 0) {
+                    var fn = queue.shift();
+                    fn();
+                }
+            }
+        }, true);
+
+        return function nextTick(fn) {
+            queue.push(fn);
+            window.postMessage('process-tick', '*');
+        };
+    }
+
+    return function nextTick(fn) {
+        setTimeout(fn, 0);
+    };
+})();
+
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+}
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+
+},{}],12:[function(require,module,exports){
+(function(process){// vim:ts=4:sts=4:sw=4:
+/*!
+ *
+ * Copyright 2009-2012 Kris Kowal under the terms of the MIT
+ * license found at http://github.com/kriskowal/q/raw/master/LICENSE
+ *
+ * With parts by Tyler Close
+ * Copyright 2007-2009 Tyler Close under the terms of the MIT X license found
+ * at http://www.opensource.org/licenses/mit-license.html
+ * Forked at ref_send.js version: 2009-05-11
+ *
+ * With parts by Mark Miller
+ * Copyright (C) 2011 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+(function (definition) {
+    // Turn off strict mode for this function so we can assign to global.Q
+    /* jshint strict: false */
+
+    // This file will function properly as a <script> tag, or a module
+    // using CommonJS and NodeJS or RequireJS module formats.  In
+    // Common/Node/RequireJS, the module exports the Q API and when
+    // executed as a simple <script>, it creates a Q global instead.
+
+    // Montage Require
+    if (typeof bootstrap === "function") {
+        bootstrap("promise", definition);
+
+    // CommonJS
+    } else if (typeof exports === "object") {
+        module.exports = definition();
+
+    // RequireJS
+    } else if (typeof define === "function" && define.amd) {
+        define(definition);
+
+    // SES (Secure EcmaScript)
+    } else if (typeof ses !== "undefined") {
+        if (!ses.ok()) {
+            return;
+        } else {
+            ses.makeQ = definition;
+        }
+
+    // <script>
+    } else {
+        Q = definition();
+    }
+
+})(function () {
+"use strict";
+
+var hasStacks = false;
+try {
+    throw new Error();
+} catch (e) {
+    hasStacks = !!e.stack;
+}
+
+// All code after this point will be filtered from stack traces reported
+// by Q.
+var qStartingLine = captureLine();
+var qFileName;
+
+// shims
+
+// used for fallback in "allResolved"
+var noop = function () {};
+
+// Use the fastest possible means to execute a task in a future turn
+// of the event loop.
+var nextTick =(function () {
+    // linked list of tasks (single, with head node)
+    var head = {task: void 0, next: null};
+    var tail = head;
+    var flushing = false;
+    var requestTick = void 0;
+    var isNodeJS = false;
+
+    function flush() {
+        /* jshint loopfunc: true */
+
+        while (head.next) {
+            head = head.next;
+            var task = head.task;
+            head.task = void 0;
+            var domain = head.domain;
+
+            if (domain) {
+                head.domain = void 0;
+                domain.enter();
+            }
+
+            try {
+                task();
+
+            } catch (e) {
+                if (isNodeJS) {
+                    // In node, uncaught exceptions are considered fatal errors.
+                    // Re-throw them synchronously to interrupt flushing!
+
+                    // Ensure continuation if the uncaught exception is suppressed
+                    // listening "uncaughtException" events (as domains does).
+                    // Continue in next event to avoid tick recursion.
+                    if (domain) {
+                        domain.exit();
+                    }
+                    setTimeout(flush, 0);
+                    if (domain) {
+                        domain.enter();
+                    }
+
+                    throw e;
+
+                } else {
+                    // In browsers, uncaught exceptions are not fatal.
+                    // Re-throw them asynchronously to avoid slow-downs.
+                    setTimeout(function() {
+                       throw e;
+                    }, 0);
+                }
+            }
+
+            if (domain) {
+                domain.exit();
+            }
+        }
+
+        flushing = false;
+    }
+
+    nextTick = function (task) {
+        tail = tail.next = {
+            task: task,
+            domain: isNodeJS && process.domain,
+            next: null
+        };
+
+        if (!flushing) {
+            flushing = true;
+            requestTick();
+        }
+    };
+
+    if (typeof process !== "undefined" && process.nextTick) {
+        // Node.js before 0.9. Note that some fake-Node environments, like the
+        // Mocha test runner, introduce a `process` global without a `nextTick`.
+        isNodeJS = true;
+
+        requestTick = function () {
+            process.nextTick(flush);
+        };
+
+    } else if (typeof setImmediate === "function") {
+        // In IE10, Node.js 0.9+, or https://github.com/NobleJS/setImmediate
+        if (typeof window !== "undefined") {
+            requestTick = setImmediate.bind(window, flush);
+        } else {
+            requestTick = function () {
+                setImmediate(flush);
+            };
+        }
+
+    } else if (typeof MessageChannel !== "undefined") {
+        // modern browsers
+        // http://www.nonblocking.io/2011/06/windownexttick.html
+        var channel = new MessageChannel();
+        // At least Safari Version 6.0.5 (8536.30.1) intermittently cannot create
+        // working message ports the first time a page loads.
+        channel.port1.onmessage = function () {
+            requestTick = requestPortTick;
+            channel.port1.onmessage = flush;
+            flush();
+        };
+        var requestPortTick = function () {
+            // Opera requires us to provide a message payload, regardless of
+            // whether we use it.
+            channel.port2.postMessage(0);
+        };
+        requestTick = function () {
+            setTimeout(flush, 0);
+            requestPortTick();
+        };
+
+    } else {
+        // old browsers
+        requestTick = function () {
+            setTimeout(flush, 0);
+        };
+    }
+
+    return nextTick;
+})();
+
+// Attempt to make generics safe in the face of downstream
+// modifications.
+// There is no situation where this is necessary.
+// If you need a security guarantee, these primordials need to be
+// deeply frozen anyway, and if you don’t need a security guarantee,
+// this is just plain paranoid.
+// However, this does have the nice side-effect of reducing the size
+// of the code by reducing x.call() to merely x(), eliminating many
+// hard-to-minify characters.
+// See Mark Miller’s explanation of what this does.
+// http://wiki.ecmascript.org/doku.php?id=conventions:safe_meta_programming
+var call = Function.call;
+function uncurryThis(f) {
+    return function () {
+        return call.apply(f, arguments);
+    };
+}
+// This is equivalent, but slower:
+// uncurryThis = Function_bind.bind(Function_bind.call);
+// http://jsperf.com/uncurrythis
+
+var array_slice = uncurryThis(Array.prototype.slice);
+
+var array_reduce = uncurryThis(
+    Array.prototype.reduce || function (callback, basis) {
+        var index = 0,
+            length = this.length;
+        // concerning the initial value, if one is not provided
+        if (arguments.length === 1) {
+            // seek to the first value in the array, accounting
+            // for the possibility that is is a sparse array
+            do {
+                if (index in this) {
+                    basis = this[index++];
+                    break;
+                }
+                if (++index >= length) {
+                    throw new TypeError();
+                }
+            } while (1);
+        }
+        // reduce
+        for (; index < length; index++) {
+            // account for the possibility that the array is sparse
+            if (index in this) {
+                basis = callback(basis, this[index], index);
+            }
+        }
+        return basis;
+    }
+);
+
+var array_indexOf = uncurryThis(
+    Array.prototype.indexOf || function (value) {
+        // not a very good shim, but good enough for our one use of it
+        for (var i = 0; i < this.length; i++) {
+            if (this[i] === value) {
+                return i;
+            }
+        }
+        return -1;
+    }
+);
+
+var array_map = uncurryThis(
+    Array.prototype.map || function (callback, thisp) {
+        var self = this;
+        var collect = [];
+        array_reduce(self, function (undefined, value, index) {
+            collect.push(callback.call(thisp, value, index, self));
+        }, void 0);
+        return collect;
+    }
+);
+
+var object_create = Object.create || function (prototype) {
+    function Type() { }
+    Type.prototype = prototype;
+    return new Type();
+};
+
+var object_hasOwnProperty = uncurryThis(Object.prototype.hasOwnProperty);
+
+var object_keys = Object.keys || function (object) {
+    var keys = [];
+    for (var key in object) {
+        if (object_hasOwnProperty(object, key)) {
+            keys.push(key);
+        }
+    }
+    return keys;
+};
+
+var object_toString = uncurryThis(Object.prototype.toString);
+
+function isObject(value) {
+    return value === Object(value);
+}
+
+// generator related shims
+
+// FIXME: Remove this function once ES6 generators are in SpiderMonkey.
+function isStopIteration(exception) {
+    return (
+        object_toString(exception) === "[object StopIteration]" ||
+        exception instanceof QReturnValue
+    );
+}
+
+// FIXME: Remove this helper and Q.return once ES6 generators are in
+// SpiderMonkey.
+var QReturnValue;
+if (typeof ReturnValue !== "undefined") {
+    QReturnValue = ReturnValue;
+} else {
+    QReturnValue = function (value) {
+        this.value = value;
+    };
+}
+
+// Until V8 3.19 / Chromium 29 is released, SpiderMonkey is the only
+// engine that has a deployed base of browsers that support generators.
+// However, SM's generators use the Python-inspired semantics of
+// outdated ES6 drafts.  We would like to support ES6, but we'd also
+// like to make it possible to use generators in deployed browsers, so
+// we also support Python-style generators.  At some point we can remove
+// this block.
+var hasES6Generators;
+try {
+    /* jshint evil: true, nonew: false */
+    new Function("(function* (){ yield 1; })");
+    hasES6Generators = true;
+} catch (e) {
+    hasES6Generators = false;
+}
+
+// long stack traces
+
+var STACK_JUMP_SEPARATOR = "From previous event:";
+
+function makeStackTraceLong(error, promise) {
+    // If possible, transform the error stack trace by removing Node and Q
+    // cruft, then concatenating with the stack trace of `promise`. See #57.
+    if (hasStacks &&
+        promise.stack &&
+        typeof error === "object" &&
+        error !== null &&
+        error.stack &&
+        error.stack.indexOf(STACK_JUMP_SEPARATOR) === -1
+    ) {
+        var stacks = [];
+        for (var p = promise; !!p; p = p.source) {
+            if (p.stack) {
+                stacks.unshift(p.stack);
+            }
+        }
+        stacks.unshift(error.stack);
+
+        var concatedStacks = stacks.join("\n" + STACK_JUMP_SEPARATOR + "\n");
+        error.stack = filterStackString(concatedStacks);
     }
 }
 
-module.exports = Joueur;
-},{"../Model":13}],8:[function(require,module,exports){
+function filterStackString(stackString) {
+    var lines = stackString.split("\n");
+    var desiredLines = [];
+    for (var i = 0; i < lines.length; ++i) {
+        var line = lines[i];
+
+        if (!isInternalFrame(line) && !isNodeFrame(line) && line) {
+            desiredLines.push(line);
+        }
+    }
+    return desiredLines.join("\n");
+}
+
+function isNodeFrame(stackLine) {
+    return stackLine.indexOf("(module.js:") !== -1 ||
+           stackLine.indexOf("(node.js:") !== -1;
+}
+
+function getFileNameAndLineNumber(stackLine) {
+    // Named functions: "at functionName (filename:lineNumber:columnNumber)"
+    // In IE10 function name can have spaces ("Anonymous function") O_o
+    var attempt1 = /at .+ \((.+):(\d+):(?:\d+)\)$/.exec(stackLine);
+    if (attempt1) {
+        return [attempt1[1], Number(attempt1[2])];
+    }
+
+    // Anonymous functions: "at filename:lineNumber:columnNumber"
+    var attempt2 = /at ([^ ]+):(\d+):(?:\d+)$/.exec(stackLine);
+    if (attempt2) {
+        return [attempt2[1], Number(attempt2[2])];
+    }
+
+    // Firefox style: "function@filename:lineNumber or @filename:lineNumber"
+    var attempt3 = /.*@(.+):(\d+)$/.exec(stackLine);
+    if (attempt3) {
+        return [attempt3[1], Number(attempt3[2])];
+    }
+}
+
+function isInternalFrame(stackLine) {
+    var fileNameAndLineNumber = getFileNameAndLineNumber(stackLine);
+
+    if (!fileNameAndLineNumber) {
+        return false;
+    }
+
+    var fileName = fileNameAndLineNumber[0];
+    var lineNumber = fileNameAndLineNumber[1];
+
+    return fileName === qFileName &&
+        lineNumber >= qStartingLine &&
+        lineNumber <= qEndingLine;
+}
+
+// discover own file name and line number range for filtering stack
+// traces
+function captureLine() {
+    if (!hasStacks) {
+        return;
+    }
+
+    try {
+        throw new Error();
+    } catch (e) {
+        var lines = e.stack.split("\n");
+        var firstLine = lines[0].indexOf("@") > 0 ? lines[1] : lines[2];
+        var fileNameAndLineNumber = getFileNameAndLineNumber(firstLine);
+        if (!fileNameAndLineNumber) {
+            return;
+        }
+
+        qFileName = fileNameAndLineNumber[0];
+        return fileNameAndLineNumber[1];
+    }
+}
+
+function deprecate(callback, name, alternative) {
+    return function () {
+        if (typeof console !== "undefined" &&
+            typeof console.warn === "function") {
+            console.warn(name + " is deprecated, use " + alternative +
+                         " instead.", new Error("").stack);
+        }
+        return callback.apply(callback, arguments);
+    };
+}
+
+// end of shims
+// beginning of real work
+
+/**
+ * Constructs a promise for an immediate reference, passes promises through, or
+ * coerces promises from different systems.
+ * @param value immediate reference or promise
+ */
+function Q(value) {
+    // If the object is already a Promise, return it directly.  This enables
+    // the resolve function to both be used to created references from objects,
+    // but to tolerably coerce non-promises to promises.
+    if (isPromise(value)) {
+        return value;
+    }
+
+    // assimilate thenables
+    if (isPromiseAlike(value)) {
+        return coerce(value);
+    } else {
+        return fulfill(value);
+    }
+}
+Q.resolve = Q;
+
+/**
+ * Performs a task in a future turn of the event loop.
+ * @param {Function} task
+ */
+Q.nextTick = nextTick;
+
+/**
+ * Controls whether or not long stack traces will be on
+ */
+Q.longStackSupport = false;
+
+/**
+ * Constructs a {promise, resolve, reject} object.
+ *
+ * `resolve` is a callback to invoke with a more resolved value for the
+ * promise. To fulfill the promise, invoke `resolve` with any value that is
+ * not a thenable. To reject the promise, invoke `resolve` with a rejected
+ * thenable, or invoke `reject` with the reason directly. To resolve the
+ * promise to another thenable, thus putting it in the same state, invoke
+ * `resolve` with that other thenable.
+ */
+Q.defer = defer;
+function defer() {
+    // if "messages" is an "Array", that indicates that the promise has not yet
+    // been resolved.  If it is "undefined", it has been resolved.  Each
+    // element of the messages array is itself an array of complete arguments to
+    // forward to the resolved promise.  We coerce the resolution value to a
+    // promise using the `resolve` function because it handles both fully
+    // non-thenable values and other thenables gracefully.
+    var messages = [], progressListeners = [], resolvedPromise;
+
+    var deferred = object_create(defer.prototype);
+    var promise = object_create(Promise.prototype);
+
+    promise.promiseDispatch = function (resolve, op, operands) {
+        var args = array_slice(arguments);
+        if (messages) {
+            messages.push(args);
+            if (op === "when" && operands[1]) { // progress operand
+                progressListeners.push(operands[1]);
+            }
+        } else {
+            nextTick(function () {
+                resolvedPromise.promiseDispatch.apply(resolvedPromise, args);
+            });
+        }
+    };
+
+    // XXX deprecated
+    promise.valueOf = deprecate(function () {
+        if (messages) {
+            return promise;
+        }
+        var nearerValue = nearer(resolvedPromise);
+        if (isPromise(nearerValue)) {
+            resolvedPromise = nearerValue; // shorten chain
+        }
+        return nearerValue;
+    }, "valueOf", "inspect");
+
+    promise.inspect = function () {
+        if (!resolvedPromise) {
+            return { state: "pending" };
+        }
+        return resolvedPromise.inspect();
+    };
+
+    if (Q.longStackSupport && hasStacks) {
+        try {
+            throw new Error();
+        } catch (e) {
+            // NOTE: don't try to use `Error.captureStackTrace` or transfer the
+            // accessor around; that causes memory leaks as per GH-111. Just
+            // reify the stack trace as a string ASAP.
+            //
+            // At the same time, cut off the first line; it's always just
+            // "[object Promise]\n", as per the `toString`.
+            promise.stack = e.stack.substring(e.stack.indexOf("\n") + 1);
+        }
+    }
+
+    // NOTE: we do the checks for `resolvedPromise` in each method, instead of
+    // consolidating them into `become`, since otherwise we'd create new
+    // promises with the lines `become(whatever(value))`. See e.g. GH-252.
+
+    function become(newPromise) {
+        resolvedPromise = newPromise;
+        promise.source = newPromise;
+
+        array_reduce(messages, function (undefined, message) {
+            nextTick(function () {
+                newPromise.promiseDispatch.apply(newPromise, message);
+            });
+        }, void 0);
+
+        messages = void 0;
+        progressListeners = void 0;
+    }
+
+    deferred.promise = promise;
+    deferred.resolve = function (value) {
+        if (resolvedPromise) {
+            return;
+        }
+
+        become(Q(value));
+    };
+
+    deferred.fulfill = function (value) {
+        if (resolvedPromise) {
+            return;
+        }
+
+        become(fulfill(value));
+    };
+    deferred.reject = function (reason) {
+        if (resolvedPromise) {
+            return;
+        }
+
+        become(reject(reason));
+    };
+    deferred.notify = function (progress) {
+        if (resolvedPromise) {
+            return;
+        }
+
+        array_reduce(progressListeners, function (undefined, progressListener) {
+            nextTick(function () {
+                progressListener(progress);
+            });
+        }, void 0);
+    };
+
+    return deferred;
+}
+
+/**
+ * Creates a Node-style callback that will resolve or reject the deferred
+ * promise.
+ * @returns a nodeback
+ */
+defer.prototype.makeNodeResolver = function () {
+    var self = this;
+    return function (error, value) {
+        if (error) {
+            self.reject(error);
+        } else if (arguments.length > 2) {
+            self.resolve(array_slice(arguments, 1));
+        } else {
+            self.resolve(value);
+        }
+    };
+};
+
+/**
+ * @param resolver {Function} a function that returns nothing and accepts
+ * the resolve, reject, and notify functions for a deferred.
+ * @returns a promise that may be resolved with the given resolve and reject
+ * functions, or rejected by a thrown exception in resolver
+ */
+Q.promise = promise;
+function promise(resolver) {
+    if (typeof resolver !== "function") {
+        throw new TypeError("resolver must be a function.");
+    }
+    var deferred = defer();
+    try {
+        resolver(deferred.resolve, deferred.reject, deferred.notify);
+    } catch (reason) {
+        deferred.reject(reason);
+    }
+    return deferred.promise;
+}
+
+// XXX experimental.  This method is a way to denote that a local value is
+// serializable and should be immediately dispatched to a remote upon request,
+// instead of passing a reference.
+Q.passByCopy = function (object) {
+    //freeze(object);
+    //passByCopies.set(object, true);
+    return object;
+};
+
+Promise.prototype.passByCopy = function () {
+    //freeze(object);
+    //passByCopies.set(object, true);
+    return this;
+};
+
+/**
+ * If two promises eventually fulfill to the same value, promises that value,
+ * but otherwise rejects.
+ * @param x {Any*}
+ * @param y {Any*}
+ * @returns {Any*} a promise for x and y if they are the same, but a rejection
+ * otherwise.
+ *
+ */
+Q.join = function (x, y) {
+    return Q(x).join(y);
+};
+
+Promise.prototype.join = function (that) {
+    return Q([this, that]).spread(function (x, y) {
+        if (x === y) {
+            // TODO: "===" should be Object.is or equiv
+            return x;
+        } else {
+            throw new Error("Can't join: not the same: " + x + " " + y);
+        }
+    });
+};
+
+/**
+ * Returns a promise for the first of an array of promises to become fulfilled.
+ * @param answers {Array[Any*]} promises to race
+ * @returns {Any*} the first promise to be fulfilled
+ */
+Q.race = race;
+function race(answerPs) {
+    return promise(function(resolve, reject) {
+        // Switch to this once we can assume at least ES5
+        // answerPs.forEach(function(answerP) {
+        //     Q(answerP).then(resolve, reject);
+        // });
+        // Use this in the meantime
+        for (var i = 0, len = answerPs.length; i < len; i++) {
+            Q(answerPs[i]).then(resolve, reject);
+        }
+    });
+}
+
+Promise.prototype.race = function () {
+    return this.then(Q.race);
+};
+
+/**
+ * Constructs a Promise with a promise descriptor object and optional fallback
+ * function.  The descriptor contains methods like when(rejected), get(name),
+ * set(name, value), post(name, args), and delete(name), which all
+ * return either a value, a promise for a value, or a rejection.  The fallback
+ * accepts the operation name, a resolver, and any further arguments that would
+ * have been forwarded to the appropriate method above had a method been
+ * provided with the proper name.  The API makes no guarantees about the nature
+ * of the returned object, apart from that it is usable whereever promises are
+ * bought and sold.
+ */
+Q.makePromise = Promise;
+function Promise(descriptor, fallback, inspect) {
+    if (fallback === void 0) {
+        fallback = function (op) {
+            return reject(new Error(
+                "Promise does not support operation: " + op
+            ));
+        };
+    }
+    if (inspect === void 0) {
+        inspect = function () {
+            return {state: "unknown"};
+        };
+    }
+
+    var promise = object_create(Promise.prototype);
+
+    promise.promiseDispatch = function (resolve, op, args) {
+        var result;
+        try {
+            if (descriptor[op]) {
+                result = descriptor[op].apply(promise, args);
+            } else {
+                result = fallback.call(promise, op, args);
+            }
+        } catch (exception) {
+            result = reject(exception);
+        }
+        if (resolve) {
+            resolve(result);
+        }
+    };
+
+    promise.inspect = inspect;
+
+    // XXX deprecated `valueOf` and `exception` support
+    if (inspect) {
+        var inspected = inspect();
+        if (inspected.state === "rejected") {
+            promise.exception = inspected.reason;
+        }
+
+        promise.valueOf = deprecate(function () {
+            var inspected = inspect();
+            if (inspected.state === "pending" ||
+                inspected.state === "rejected") {
+                return promise;
+            }
+            return inspected.value;
+        });
+    }
+
+    return promise;
+}
+
+Promise.prototype.toString = function () {
+    return "[object Promise]";
+};
+
+Promise.prototype.then = function (fulfilled, rejected, progressed) {
+    var self = this;
+    var deferred = defer();
+    var done = false;   // ensure the untrusted promise makes at most a
+                        // single call to one of the callbacks
+
+    function _fulfilled(value) {
+        try {
+            return typeof fulfilled === "function" ? fulfilled(value) : value;
+        } catch (exception) {
+            return reject(exception);
+        }
+    }
+
+    function _rejected(exception) {
+        if (typeof rejected === "function") {
+            makeStackTraceLong(exception, self);
+            try {
+                return rejected(exception);
+            } catch (newException) {
+                return reject(newException);
+            }
+        }
+        return reject(exception);
+    }
+
+    function _progressed(value) {
+        return typeof progressed === "function" ? progressed(value) : value;
+    }
+
+    nextTick(function () {
+        self.promiseDispatch(function (value) {
+            if (done) {
+                return;
+            }
+            done = true;
+
+            deferred.resolve(_fulfilled(value));
+        }, "when", [function (exception) {
+            if (done) {
+                return;
+            }
+            done = true;
+
+            deferred.resolve(_rejected(exception));
+        }]);
+    });
+
+    // Progress propagator need to be attached in the current tick.
+    self.promiseDispatch(void 0, "when", [void 0, function (value) {
+        var newValue;
+        var threw = false;
+        try {
+            newValue = _progressed(value);
+        } catch (e) {
+            threw = true;
+            if (Q.onerror) {
+                Q.onerror(e);
+            } else {
+                throw e;
+            }
+        }
+
+        if (!threw) {
+            deferred.notify(newValue);
+        }
+    }]);
+
+    return deferred.promise;
+};
+
+/**
+ * Registers an observer on a promise.
+ *
+ * Guarantees:
+ *
+ * 1. that fulfilled and rejected will be called only once.
+ * 2. that either the fulfilled callback or the rejected callback will be
+ *    called, but not both.
+ * 3. that fulfilled and rejected will not be called in this turn.
+ *
+ * @param value      promise or immediate reference to observe
+ * @param fulfilled  function to be called with the fulfilled value
+ * @param rejected   function to be called with the rejection exception
+ * @param progressed function to be called on any progress notifications
+ * @return promise for the return value from the invoked callback
+ */
+Q.when = when;
+function when(value, fulfilled, rejected, progressed) {
+    return Q(value).then(fulfilled, rejected, progressed);
+}
+
+Promise.prototype.thenResolve = function (value) {
+    return this.then(function () { return value; });
+};
+
+Q.thenResolve = function (promise, value) {
+    return Q(promise).thenResolve(value);
+};
+
+Promise.prototype.thenReject = function (reason) {
+    return this.then(function () { throw reason; });
+};
+
+Q.thenReject = function (promise, reason) {
+    return Q(promise).thenReject(reason);
+};
+
+/**
+ * If an object is not a promise, it is as "near" as possible.
+ * If a promise is rejected, it is as "near" as possible too.
+ * If it’s a fulfilled promise, the fulfillment value is nearer.
+ * If it’s a deferred promise and the deferred has been resolved, the
+ * resolution is "nearer".
+ * @param object
+ * @returns most resolved (nearest) form of the object
+ */
+
+// XXX should we re-do this?
+Q.nearer = nearer;
+function nearer(value) {
+    if (isPromise(value)) {
+        var inspected = value.inspect();
+        if (inspected.state === "fulfilled") {
+            return inspected.value;
+        }
+    }
+    return value;
+}
+
+/**
+ * @returns whether the given object is a promise.
+ * Otherwise it is a fulfilled value.
+ */
+Q.isPromise = isPromise;
+function isPromise(object) {
+    return isObject(object) &&
+        typeof object.promiseDispatch === "function" &&
+        typeof object.inspect === "function";
+}
+
+Q.isPromiseAlike = isPromiseAlike;
+function isPromiseAlike(object) {
+    return isObject(object) && typeof object.then === "function";
+}
+
+/**
+ * @returns whether the given object is a pending promise, meaning not
+ * fulfilled or rejected.
+ */
+Q.isPending = isPending;
+function isPending(object) {
+    return isPromise(object) && object.inspect().state === "pending";
+}
+
+Promise.prototype.isPending = function () {
+    return this.inspect().state === "pending";
+};
+
+/**
+ * @returns whether the given object is a value or fulfilled
+ * promise.
+ */
+Q.isFulfilled = isFulfilled;
+function isFulfilled(object) {
+    return !isPromise(object) || object.inspect().state === "fulfilled";
+}
+
+Promise.prototype.isFulfilled = function () {
+    return this.inspect().state === "fulfilled";
+};
+
+/**
+ * @returns whether the given object is a rejected promise.
+ */
+Q.isRejected = isRejected;
+function isRejected(object) {
+    return isPromise(object) && object.inspect().state === "rejected";
+}
+
+Promise.prototype.isRejected = function () {
+    return this.inspect().state === "rejected";
+};
+
+//// BEGIN UNHANDLED REJECTION TRACKING
+
+// This promise library consumes exceptions thrown in handlers so they can be
+// handled by a subsequent promise.  The exceptions get added to this array when
+// they are created, and removed when they are handled.  Note that in ES6 or
+// shimmed environments, this would naturally be a `Set`.
+var unhandledReasons = [];
+var unhandledRejections = [];
+var unhandledReasonsDisplayed = false;
+var trackUnhandledRejections = true;
+function displayUnhandledReasons() {
+    if (
+        !unhandledReasonsDisplayed &&
+        typeof window !== "undefined" &&
+        !window.Touch &&
+        window.console
+    ) {
+        console.warn("[Q] Unhandled rejection reasons (should be empty):",
+                     unhandledReasons);
+    }
+
+    unhandledReasonsDisplayed = true;
+}
+
+function logUnhandledReasons() {
+    for (var i = 0; i < unhandledReasons.length; i++) {
+        var reason = unhandledReasons[i];
+        console.warn("Unhandled rejection reason:", reason);
+    }
+}
+
+function resetUnhandledRejections() {
+    unhandledReasons.length = 0;
+    unhandledRejections.length = 0;
+    unhandledReasonsDisplayed = false;
+
+    if (!trackUnhandledRejections) {
+        trackUnhandledRejections = true;
+
+        // Show unhandled rejection reasons if Node exits without handling an
+        // outstanding rejection.  (Note that Browserify presently produces a
+        // `process` global without the `EventEmitter` `on` method.)
+        if (typeof process !== "undefined" && process.on) {
+            process.on("exit", logUnhandledReasons);
+        }
+    }
+}
+
+function trackRejection(promise, reason) {
+    if (!trackUnhandledRejections) {
+        return;
+    }
+
+    unhandledRejections.push(promise);
+    if (reason && typeof reason.stack !== "undefined") {
+        unhandledReasons.push(reason.stack);
+    } else {
+        unhandledReasons.push("(no stack) " + reason);
+    }
+    displayUnhandledReasons();
+}
+
+function untrackRejection(promise) {
+    if (!trackUnhandledRejections) {
+        return;
+    }
+
+    var at = array_indexOf(unhandledRejections, promise);
+    if (at !== -1) {
+        unhandledRejections.splice(at, 1);
+        unhandledReasons.splice(at, 1);
+    }
+}
+
+Q.resetUnhandledRejections = resetUnhandledRejections;
+
+Q.getUnhandledReasons = function () {
+    // Make a copy so that consumers can't interfere with our internal state.
+    return unhandledReasons.slice();
+};
+
+Q.stopUnhandledRejectionTracking = function () {
+    resetUnhandledRejections();
+    if (typeof process !== "undefined" && process.on) {
+        process.removeListener("exit", logUnhandledReasons);
+    }
+    trackUnhandledRejections = false;
+};
+
+resetUnhandledRejections();
+
+//// END UNHANDLED REJECTION TRACKING
+
+/**
+ * Constructs a rejected promise.
+ * @param reason value describing the failure
+ */
+Q.reject = reject;
+function reject(reason) {
+    var rejection = Promise({
+        "when": function (rejected) {
+            // note that the error has been handled
+            if (rejected) {
+                untrackRejection(this);
+            }
+            return rejected ? rejected(reason) : this;
+        }
+    }, function fallback() {
+        return this;
+    }, function inspect() {
+        return { state: "rejected", reason: reason };
+    });
+
+    // Note that the reason has not been handled.
+    trackRejection(rejection, reason);
+
+    return rejection;
+}
+
+/**
+ * Constructs a fulfilled promise for an immediate reference.
+ * @param value immediate reference
+ */
+Q.fulfill = fulfill;
+function fulfill(value) {
+    return Promise({
+        "when": function () {
+            return value;
+        },
+        "get": function (name) {
+            return value[name];
+        },
+        "set": function (name, rhs) {
+            value[name] = rhs;
+        },
+        "delete": function (name) {
+            delete value[name];
+        },
+        "post": function (name, args) {
+            // Mark Miller proposes that post with no name should apply a
+            // promised function.
+            if (name === null || name === void 0) {
+                return value.apply(void 0, args);
+            } else {
+                return value[name].apply(value, args);
+            }
+        },
+        "apply": function (thisp, args) {
+            return value.apply(thisp, args);
+        },
+        "keys": function () {
+            return object_keys(value);
+        }
+    }, void 0, function inspect() {
+        return { state: "fulfilled", value: value };
+    });
+}
+
+/**
+ * Converts thenables to Q promises.
+ * @param promise thenable promise
+ * @returns a Q promise
+ */
+function coerce(promise) {
+    var deferred = defer();
+    nextTick(function () {
+        try {
+            promise.then(deferred.resolve, deferred.reject, deferred.notify);
+        } catch (exception) {
+            deferred.reject(exception);
+        }
+    });
+    return deferred.promise;
+}
+
+/**
+ * Annotates an object such that it will never be
+ * transferred away from this process over any promise
+ * communication channel.
+ * @param object
+ * @returns promise a wrapping of that object that
+ * additionally responds to the "isDef" message
+ * without a rejection.
+ */
+Q.master = master;
+function master(object) {
+    return Promise({
+        "isDef": function () {}
+    }, function fallback(op, args) {
+        return dispatch(object, op, args);
+    }, function () {
+        return Q(object).inspect();
+    });
+}
+
+/**
+ * Spreads the values of a promised array of arguments into the
+ * fulfillment callback.
+ * @param fulfilled callback that receives variadic arguments from the
+ * promised array
+ * @param rejected callback that receives the exception if the promise
+ * is rejected.
+ * @returns a promise for the return value or thrown exception of
+ * either callback.
+ */
+Q.spread = spread;
+function spread(value, fulfilled, rejected) {
+    return Q(value).spread(fulfilled, rejected);
+}
+
+Promise.prototype.spread = function (fulfilled, rejected) {
+    return this.all().then(function (array) {
+        return fulfilled.apply(void 0, array);
+    }, rejected);
+};
+
+/**
+ * The async function is a decorator for generator functions, turning
+ * them into asynchronous generators.  Although generators are only part
+ * of the newest ECMAScript 6 drafts, this code does not cause syntax
+ * errors in older engines.  This code should continue to work and will
+ * in fact improve over time as the language improves.
+ *
+ * ES6 generators are currently part of V8 version 3.19 with the
+ * --harmony-generators runtime flag enabled.  SpiderMonkey has had them
+ * for longer, but under an older Python-inspired form.  This function
+ * works on both kinds of generators.
+ *
+ * Decorates a generator function such that:
+ *  - it may yield promises
+ *  - execution will continue when that promise is fulfilled
+ *  - the value of the yield expression will be the fulfilled value
+ *  - it returns a promise for the return value (when the generator
+ *    stops iterating)
+ *  - the decorated function returns a promise for the return value
+ *    of the generator or the first rejected promise among those
+ *    yielded.
+ *  - if an error is thrown in the generator, it propagates through
+ *    every following yield until it is caught, or until it escapes
+ *    the generator function altogether, and is translated into a
+ *    rejection for the promise returned by the decorated generator.
+ */
+Q.async = async;
+function async(makeGenerator) {
+    return function () {
+        // when verb is "send", arg is a value
+        // when verb is "throw", arg is an exception
+        function continuer(verb, arg) {
+            var result;
+            if (hasES6Generators) {
+                try {
+                    result = generator[verb](arg);
+                } catch (exception) {
+                    return reject(exception);
+                }
+                if (result.done) {
+                    return result.value;
+                } else {
+                    return when(result.value, callback, errback);
+                }
+            } else {
+                // FIXME: Remove this case when SM does ES6 generators.
+                try {
+                    result = generator[verb](arg);
+                } catch (exception) {
+                    if (isStopIteration(exception)) {
+                        return exception.value;
+                    } else {
+                        return reject(exception);
+                    }
+                }
+                return when(result, callback, errback);
+            }
+        }
+        var generator = makeGenerator.apply(this, arguments);
+        var callback = continuer.bind(continuer, "next");
+        var errback = continuer.bind(continuer, "throw");
+        return callback();
+    };
+}
+
+/**
+ * The spawn function is a small wrapper around async that immediately
+ * calls the generator and also ends the promise chain, so that any
+ * unhandled errors are thrown instead of forwarded to the error
+ * handler. This is useful because it's extremely common to run
+ * generators at the top-level to work with libraries.
+ */
+Q.spawn = spawn;
+function spawn(makeGenerator) {
+    Q.done(Q.async(makeGenerator)());
+}
+
+// FIXME: Remove this interface once ES6 generators are in SpiderMonkey.
+/**
+ * Throws a ReturnValue exception to stop an asynchronous generator.
+ *
+ * This interface is a stop-gap measure to support generator return
+ * values in older Firefox/SpiderMonkey.  In browsers that support ES6
+ * generators like Chromium 29, just use "return" in your generator
+ * functions.
+ *
+ * @param value the return value for the surrounding generator
+ * @throws ReturnValue exception with the value.
+ * @example
+ * // ES6 style
+ * Q.async(function* () {
+ *      var foo = yield getFooPromise();
+ *      var bar = yield getBarPromise();
+ *      return foo + bar;
+ * })
+ * // Older SpiderMonkey style
+ * Q.async(function () {
+ *      var foo = yield getFooPromise();
+ *      var bar = yield getBarPromise();
+ *      Q.return(foo + bar);
+ * })
+ */
+Q["return"] = _return;
+function _return(value) {
+    throw new QReturnValue(value);
+}
+
+/**
+ * The promised function decorator ensures that any promise arguments
+ * are settled and passed as values (`this` is also settled and passed
+ * as a value).  It will also ensure that the result of a function is
+ * always a promise.
+ *
+ * @example
+ * var add = Q.promised(function (a, b) {
+ *     return a + b;
+ * });
+ * add(Q(a), Q(B));
+ *
+ * @param {function} callback The function to decorate
+ * @returns {function} a function that has been decorated.
+ */
+Q.promised = promised;
+function promised(callback) {
+    return function () {
+        return spread([this, all(arguments)], function (self, args) {
+            return callback.apply(self, args);
+        });
+    };
+}
+
+/**
+ * sends a message to a value in a future turn
+ * @param object* the recipient
+ * @param op the name of the message operation, e.g., "when",
+ * @param args further arguments to be forwarded to the operation
+ * @returns result {Promise} a promise for the result of the operation
+ */
+Q.dispatch = dispatch;
+function dispatch(object, op, args) {
+    return Q(object).dispatch(op, args);
+}
+
+Promise.prototype.dispatch = function (op, args) {
+    var self = this;
+    var deferred = defer();
+    nextTick(function () {
+        self.promiseDispatch(deferred.resolve, op, args);
+    });
+    return deferred.promise;
+};
+
+/**
+ * Gets the value of a property in a future turn.
+ * @param object    promise or immediate reference for target object
+ * @param name      name of property to get
+ * @return promise for the property value
+ */
+Q.get = function (object, key) {
+    return Q(object).dispatch("get", [key]);
+};
+
+Promise.prototype.get = function (key) {
+    return this.dispatch("get", [key]);
+};
+
+/**
+ * Sets the value of a property in a future turn.
+ * @param object    promise or immediate reference for object object
+ * @param name      name of property to set
+ * @param value     new value of property
+ * @return promise for the return value
+ */
+Q.set = function (object, key, value) {
+    return Q(object).dispatch("set", [key, value]);
+};
+
+Promise.prototype.set = function (key, value) {
+    return this.dispatch("set", [key, value]);
+};
+
+/**
+ * Deletes a property in a future turn.
+ * @param object    promise or immediate reference for target object
+ * @param name      name of property to delete
+ * @return promise for the return value
+ */
+Q.del = // XXX legacy
+Q["delete"] = function (object, key) {
+    return Q(object).dispatch("delete", [key]);
+};
+
+Promise.prototype.del = // XXX legacy
+Promise.prototype["delete"] = function (key) {
+    return this.dispatch("delete", [key]);
+};
+
+/**
+ * Invokes a method in a future turn.
+ * @param object    promise or immediate reference for target object
+ * @param name      name of method to invoke
+ * @param value     a value to post, typically an array of
+ *                  invocation arguments for promises that
+ *                  are ultimately backed with `resolve` values,
+ *                  as opposed to those backed with URLs
+ *                  wherein the posted value can be any
+ *                  JSON serializable object.
+ * @return promise for the return value
+ */
+// bound locally because it is used by other methods
+Q.mapply = // XXX As proposed by "Redsandro"
+Q.post = function (object, name, args) {
+    return Q(object).dispatch("post", [name, args]);
+};
+
+Promise.prototype.mapply = // XXX As proposed by "Redsandro"
+Promise.prototype.post = function (name, args) {
+    return this.dispatch("post", [name, args]);
+};
+
+/**
+ * Invokes a method in a future turn.
+ * @param object    promise or immediate reference for target object
+ * @param name      name of method to invoke
+ * @param ...args   array of invocation arguments
+ * @return promise for the return value
+ */
+Q.send = // XXX Mark Miller's proposed parlance
+Q.mcall = // XXX As proposed by "Redsandro"
+Q.invoke = function (object, name /*...args*/) {
+    return Q(object).dispatch("post", [name, array_slice(arguments, 2)]);
+};
+
+Promise.prototype.send = // XXX Mark Miller's proposed parlance
+Promise.prototype.mcall = // XXX As proposed by "Redsandro"
+Promise.prototype.invoke = function (name /*...args*/) {
+    return this.dispatch("post", [name, array_slice(arguments, 1)]);
+};
+
+/**
+ * Applies the promised function in a future turn.
+ * @param object    promise or immediate reference for target function
+ * @param args      array of application arguments
+ */
+Q.fapply = function (object, args) {
+    return Q(object).dispatch("apply", [void 0, args]);
+};
+
+Promise.prototype.fapply = function (args) {
+    return this.dispatch("apply", [void 0, args]);
+};
+
+/**
+ * Calls the promised function in a future turn.
+ * @param object    promise or immediate reference for target function
+ * @param ...args   array of application arguments
+ */
+Q["try"] =
+Q.fcall = function (object /* ...args*/) {
+    return Q(object).dispatch("apply", [void 0, array_slice(arguments, 1)]);
+};
+
+Promise.prototype.fcall = function (/*...args*/) {
+    return this.dispatch("apply", [void 0, array_slice(arguments)]);
+};
+
+/**
+ * Binds the promised function, transforming return values into a fulfilled
+ * promise and thrown errors into a rejected one.
+ * @param object    promise or immediate reference for target function
+ * @param ...args   array of application arguments
+ */
+Q.fbind = function (object /*...args*/) {
+    var promise = Q(object);
+    var args = array_slice(arguments, 1);
+    return function fbound() {
+        return promise.dispatch("apply", [
+            this,
+            args.concat(array_slice(arguments))
+        ]);
+    };
+};
+Promise.prototype.fbind = function (/*...args*/) {
+    var promise = this;
+    var args = array_slice(arguments);
+    return function fbound() {
+        return promise.dispatch("apply", [
+            this,
+            args.concat(array_slice(arguments))
+        ]);
+    };
+};
+
+/**
+ * Requests the names of the owned properties of a promised
+ * object in a future turn.
+ * @param object    promise or immediate reference for target object
+ * @return promise for the keys of the eventually settled object
+ */
+Q.keys = function (object) {
+    return Q(object).dispatch("keys", []);
+};
+
+Promise.prototype.keys = function () {
+    return this.dispatch("keys", []);
+};
+
+/**
+ * Turns an array of promises into a promise for an array.  If any of
+ * the promises gets rejected, the whole array is rejected immediately.
+ * @param {Array*} an array (or promise for an array) of values (or
+ * promises for values)
+ * @returns a promise for an array of the corresponding values
+ */
+// By Mark Miller
+// http://wiki.ecmascript.org/doku.php?id=strawman:concurrency&rev=1308776521#allfulfilled
+Q.all = all;
+function all(promises) {
+    return when(promises, function (promises) {
+        var countDown = 0;
+        var deferred = defer();
+        array_reduce(promises, function (undefined, promise, index) {
+            var snapshot;
+            if (
+                isPromise(promise) &&
+                (snapshot = promise.inspect()).state === "fulfilled"
+            ) {
+                promises[index] = snapshot.value;
+            } else {
+                ++countDown;
+                when(
+                    promise,
+                    function (value) {
+                        promises[index] = value;
+                        if (--countDown === 0) {
+                            deferred.resolve(promises);
+                        }
+                    },
+                    deferred.reject,
+                    function (progress) {
+                        deferred.notify({ index: index, value: progress });
+                    }
+                );
+            }
+        }, void 0);
+        if (countDown === 0) {
+            deferred.resolve(promises);
+        }
+        return deferred.promise;
+    });
+}
+
+Promise.prototype.all = function () {
+    return all(this);
+};
+
+/**
+ * Waits for all promises to be settled, either fulfilled or
+ * rejected.  This is distinct from `all` since that would stop
+ * waiting at the first rejection.  The promise returned by
+ * `allResolved` will never be rejected.
+ * @param promises a promise for an array (or an array) of promises
+ * (or values)
+ * @return a promise for an array of promises
+ */
+Q.allResolved = deprecate(allResolved, "allResolved", "allSettled");
+function allResolved(promises) {
+    return when(promises, function (promises) {
+        promises = array_map(promises, Q);
+        return when(all(array_map(promises, function (promise) {
+            return when(promise, noop, noop);
+        })), function () {
+            return promises;
+        });
+    });
+}
+
+Promise.prototype.allResolved = function () {
+    return allResolved(this);
+};
+
+/**
+ * @see Promise#allSettled
+ */
+Q.allSettled = allSettled;
+function allSettled(promises) {
+    return Q(promises).allSettled();
+}
+
+/**
+ * Turns an array of promises into a promise for an array of their states (as
+ * returned by `inspect`) when they have all settled.
+ * @param {Array[Any*]} values an array (or promise for an array) of values (or
+ * promises for values)
+ * @returns {Array[State]} an array of states for the respective values.
+ */
+Promise.prototype.allSettled = function () {
+    return this.then(function (promises) {
+        return all(array_map(promises, function (promise) {
+            promise = Q(promise);
+            function regardless() {
+                return promise.inspect();
+            }
+            return promise.then(regardless, regardless);
+        }));
+    });
+};
+
+/**
+ * Captures the failure of a promise, giving an oportunity to recover
+ * with a callback.  If the given promise is fulfilled, the returned
+ * promise is fulfilled.
+ * @param {Any*} promise for something
+ * @param {Function} callback to fulfill the returned promise if the
+ * given promise is rejected
+ * @returns a promise for the return value of the callback
+ */
+Q.fail = // XXX legacy
+Q["catch"] = function (object, rejected) {
+    return Q(object).then(void 0, rejected);
+};
+
+Promise.prototype.fail = // XXX legacy
+Promise.prototype["catch"] = function (rejected) {
+    return this.then(void 0, rejected);
+};
+
+/**
+ * Attaches a listener that can respond to progress notifications from a
+ * promise's originating deferred. This listener receives the exact arguments
+ * passed to ``deferred.notify``.
+ * @param {Any*} promise for something
+ * @param {Function} callback to receive any progress notifications
+ * @returns the given promise, unchanged
+ */
+Q.progress = progress;
+function progress(object, progressed) {
+    return Q(object).then(void 0, void 0, progressed);
+}
+
+Promise.prototype.progress = function (progressed) {
+    return this.then(void 0, void 0, progressed);
+};
+
+/**
+ * Provides an opportunity to observe the settling of a promise,
+ * regardless of whether the promise is fulfilled or rejected.  Forwards
+ * the resolution to the returned promise when the callback is done.
+ * The callback can return a promise to defer completion.
+ * @param {Any*} promise
+ * @param {Function} callback to observe the resolution of the given
+ * promise, takes no arguments.
+ * @returns a promise for the resolution of the given promise when
+ * ``fin`` is done.
+ */
+Q.fin = // XXX legacy
+Q["finally"] = function (object, callback) {
+    return Q(object)["finally"](callback);
+};
+
+Promise.prototype.fin = // XXX legacy
+Promise.prototype["finally"] = function (callback) {
+    callback = Q(callback);
+    return this.then(function (value) {
+        return callback.fcall().then(function () {
+            return value;
+        });
+    }, function (reason) {
+        // TODO attempt to recycle the rejection with "this".
+        return callback.fcall().then(function () {
+            throw reason;
+        });
+    });
+};
+
+/**
+ * Terminates a chain of promises, forcing rejections to be
+ * thrown as exceptions.
+ * @param {Any*} promise at the end of a chain of promises
+ * @returns nothing
+ */
+Q.done = function (object, fulfilled, rejected, progress) {
+    return Q(object).done(fulfilled, rejected, progress);
+};
+
+Promise.prototype.done = function (fulfilled, rejected, progress) {
+    var onUnhandledError = function (error) {
+        // forward to a future turn so that ``when``
+        // does not catch it and turn it into a rejection.
+        nextTick(function () {
+            makeStackTraceLong(error, promise);
+            if (Q.onerror) {
+                Q.onerror(error);
+            } else {
+                throw error;
+            }
+        });
+    };
+
+    // Avoid unnecessary `nextTick`ing via an unnecessary `when`.
+    var promise = fulfilled || rejected || progress ?
+        this.then(fulfilled, rejected, progress) :
+        this;
+
+    if (typeof process === "object" && process && process.domain) {
+        onUnhandledError = process.domain.bind(onUnhandledError);
+    }
+
+    promise.then(void 0, onUnhandledError);
+};
+
+/**
+ * Causes a promise to be rejected if it does not get fulfilled before
+ * some milliseconds time out.
+ * @param {Any*} promise
+ * @param {Number} milliseconds timeout
+ * @param {String} custom error message (optional)
+ * @returns a promise for the resolution of the given promise if it is
+ * fulfilled before the timeout, otherwise rejected.
+ */
+Q.timeout = function (object, ms, message) {
+    return Q(object).timeout(ms, message);
+};
+
+Promise.prototype.timeout = function (ms, message) {
+    var deferred = defer();
+    var timeoutId = setTimeout(function () {
+        deferred.reject(new Error(message || "Timed out after " + ms + " ms"));
+    }, ms);
+
+    this.then(function (value) {
+        clearTimeout(timeoutId);
+        deferred.resolve(value);
+    }, function (exception) {
+        clearTimeout(timeoutId);
+        deferred.reject(exception);
+    }, deferred.notify);
+
+    return deferred.promise;
+};
+
+/**
+ * Returns a promise for the given value (or promised value), some
+ * milliseconds after it resolved. Passes rejections immediately.
+ * @param {Any*} promise
+ * @param {Number} milliseconds
+ * @returns a promise for the resolution of the given promise after milliseconds
+ * time has elapsed since the resolution of the given promise.
+ * If the given promise rejects, that is passed immediately.
+ */
+Q.delay = function (object, timeout) {
+    if (timeout === void 0) {
+        timeout = object;
+        object = void 0;
+    }
+    return Q(object).delay(timeout);
+};
+
+Promise.prototype.delay = function (timeout) {
+    return this.then(function (value) {
+        var deferred = defer();
+        setTimeout(function () {
+            deferred.resolve(value);
+        }, timeout);
+        return deferred.promise;
+    });
+};
+
+/**
+ * Passes a continuation to a Node function, which is called with the given
+ * arguments provided as an array, and returns a promise.
+ *
+ *      Q.nfapply(FS.readFile, [__filename])
+ *      .then(function (content) {
+ *      })
+ *
+ */
+Q.nfapply = function (callback, args) {
+    return Q(callback).nfapply(args);
+};
+
+Promise.prototype.nfapply = function (args) {
+    var deferred = defer();
+    var nodeArgs = array_slice(args);
+    nodeArgs.push(deferred.makeNodeResolver());
+    this.fapply(nodeArgs).fail(deferred.reject);
+    return deferred.promise;
+};
+
+/**
+ * Passes a continuation to a Node function, which is called with the given
+ * arguments provided individually, and returns a promise.
+ * @example
+ * Q.nfcall(FS.readFile, __filename)
+ * .then(function (content) {
+ * })
+ *
+ */
+Q.nfcall = function (callback /*...args*/) {
+    var args = array_slice(arguments, 1);
+    return Q(callback).nfapply(args);
+};
+
+Promise.prototype.nfcall = function (/*...args*/) {
+    var nodeArgs = array_slice(arguments);
+    var deferred = defer();
+    nodeArgs.push(deferred.makeNodeResolver());
+    this.fapply(nodeArgs).fail(deferred.reject);
+    return deferred.promise;
+};
+
+/**
+ * Wraps a NodeJS continuation passing function and returns an equivalent
+ * version that returns a promise.
+ * @example
+ * Q.nfbind(FS.readFile, __filename)("utf-8")
+ * .then(console.log)
+ * .done()
+ */
+Q.nfbind =
+Q.denodeify = function (callback /*...args*/) {
+    var baseArgs = array_slice(arguments, 1);
+    return function () {
+        var nodeArgs = baseArgs.concat(array_slice(arguments));
+        var deferred = defer();
+        nodeArgs.push(deferred.makeNodeResolver());
+        Q(callback).fapply(nodeArgs).fail(deferred.reject);
+        return deferred.promise;
+    };
+};
+
+Promise.prototype.nfbind =
+Promise.prototype.denodeify = function (/*...args*/) {
+    var args = array_slice(arguments);
+    args.unshift(this);
+    return Q.denodeify.apply(void 0, args);
+};
+
+Q.nbind = function (callback, thisp /*...args*/) {
+    var baseArgs = array_slice(arguments, 2);
+    return function () {
+        var nodeArgs = baseArgs.concat(array_slice(arguments));
+        var deferred = defer();
+        nodeArgs.push(deferred.makeNodeResolver());
+        function bound() {
+            return callback.apply(thisp, arguments);
+        }
+        Q(bound).fapply(nodeArgs).fail(deferred.reject);
+        return deferred.promise;
+    };
+};
+
+Promise.prototype.nbind = function (/*thisp, ...args*/) {
+    var args = array_slice(arguments, 0);
+    args.unshift(this);
+    return Q.nbind.apply(void 0, args);
+};
+
+/**
+ * Calls a method of a Node-style object that accepts a Node-style
+ * callback with a given array of arguments, plus a provided callback.
+ * @param object an object that has the named method
+ * @param {String} name name of the method of object
+ * @param {Array} args arguments to pass to the method; the callback
+ * will be provided by Q and appended to these arguments.
+ * @returns a promise for the value or error
+ */
+Q.nmapply = // XXX As proposed by "Redsandro"
+Q.npost = function (object, name, args) {
+    return Q(object).npost(name, args);
+};
+
+Promise.prototype.nmapply = // XXX As proposed by "Redsandro"
+Promise.prototype.npost = function (name, args) {
+    var nodeArgs = array_slice(args || []);
+    var deferred = defer();
+    nodeArgs.push(deferred.makeNodeResolver());
+    this.dispatch("post", [name, nodeArgs]).fail(deferred.reject);
+    return deferred.promise;
+};
+
+/**
+ * Calls a method of a Node-style object that accepts a Node-style
+ * callback, forwarding the given variadic arguments, plus a provided
+ * callback argument.
+ * @param object an object that has the named method
+ * @param {String} name name of the method of object
+ * @param ...args arguments to pass to the method; the callback will
+ * be provided by Q and appended to these arguments.
+ * @returns a promise for the value or error
+ */
+Q.nsend = // XXX Based on Mark Miller's proposed "send"
+Q.nmcall = // XXX Based on "Redsandro's" proposal
+Q.ninvoke = function (object, name /*...args*/) {
+    var nodeArgs = array_slice(arguments, 2);
+    var deferred = defer();
+    nodeArgs.push(deferred.makeNodeResolver());
+    Q(object).dispatch("post", [name, nodeArgs]).fail(deferred.reject);
+    return deferred.promise;
+};
+
+Promise.prototype.nsend = // XXX Based on Mark Miller's proposed "send"
+Promise.prototype.nmcall = // XXX Based on "Redsandro's" proposal
+Promise.prototype.ninvoke = function (name /*...args*/) {
+    var nodeArgs = array_slice(arguments, 1);
+    var deferred = defer();
+    nodeArgs.push(deferred.makeNodeResolver());
+    this.dispatch("post", [name, nodeArgs]).fail(deferred.reject);
+    return deferred.promise;
+};
+
+/**
+ * If a function would like to support both Node continuation-passing-style and
+ * promise-returning-style, it can end its internal promise chain with
+ * `nodeify(nodeback)`, forwarding the optional nodeback argument.  If the user
+ * elects to use a nodeback, the result will be sent there.  If they do not
+ * pass a nodeback, they will receive the result promise.
+ * @param object a result (or a promise for a result)
+ * @param {Function} nodeback a Node.js-style callback
+ * @returns either the promise or nothing
+ */
+Q.nodeify = nodeify;
+function nodeify(object, nodeback) {
+    return Q(object).nodeify(nodeback);
+}
+
+Promise.prototype.nodeify = function (nodeback) {
+    if (nodeback) {
+        this.then(function (value) {
+            nextTick(function () {
+                nodeback(null, value);
+            });
+        }, function (error) {
+            nextTick(function () {
+                nodeback(error);
+            });
+        });
+    } else {
+        return this;
+    }
+};
+
+// All code before this point will be filtered from stack traces.
+var qEndingLine = captureLine();
+
+return Q;
+
+});
+
+})(require("__browserify_process"))
+},{"__browserify_process":13}],2:[function(require,module,exports){
 var Microee = require('microee');
 
 /* -------------------------------------------- */
@@ -999,50 +3297,7 @@ View.prototype.destroy = function() {
 Microee.mixin(View);
 
 module.exports = View;
-},{"microee":14}],13:[function(require,module,exports){
-var Microee = require('microee');
-var _ = require('./lib/underscore-1.5.2.js');
-
-
-/* -------------------------------------------- */
-/*             MODEL CLASS                      */
-/* -------------------------------------------- */
-
-function Model() {};
-Model.prototype.save = function() {
-    this.emit('saved');
-};
-
-Microee.mixin(Model);
-
-/* -------------------------------------------- */
-/*            MODEL LIST CLASS                  */
-/* -------------------------------------------- */
-function ModelList() {
-    this.models = [];
-}
-ModelList.prototype.load = function() {};
-ModelList.prototype.add = function(model) {
-    this.models.push(model);
-};
-ModelList.prototype.forEach = function(fn) {
-    this.models.forEach(fn);
-};
-ModelList.prototype.getById = function(id) {
-    var matches = _.filter(this.models, function(model) {
-        return Number(id) === Number(model.id);
-    });
-
-    return matches ? matches[0] : null;
-};
-
-Microee.mixin(ModelList);
-
-module.exports = {
-    ModelList: ModelList,
-    Model: Model
-};
-},{"./lib/underscore-1.5.2.js":9,"microee":14}],14:[function(require,module,exports){
+},{"microee":14}],14:[function(require,module,exports){
 function M() { this._events = {}; }
 M.prototype = {
   on: function(ev, cb) {
@@ -1091,5 +3346,5 @@ M.mixin = function(dest) {
 };
 module.exports = M;
 
-},{}]},{},[1])
+},{}]},{},[9])
 ;

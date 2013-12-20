@@ -19,7 +19,19 @@ $headerBorderBottom: 0;
   h1 {
     text-align: left;
     margin-left: image-width($logoUrl) + 20;
-    font-size: image-height($logoUrl) - 20;
+    font-size: image-height($logoUrl) - 35;
   }
 
+  nav {
+    margin-left: image-width($logoUrl) + 20;
+    display: block;
+
+    li {
+      display: inline-block;
+    }
+    a {
+      color: #333;
+      text-decoration: underline;
+    }
+  }
 }
