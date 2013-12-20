@@ -61,6 +61,8 @@ app.get('/combis', policies.isAuthenticated, controller.allCombi);
 app.post('/combis', policies.isAuthenticated, controller.saveCombi);
 app.del('/combis/:id', policies.isAuthenticated, controller.deleteCombi);
 
+app.post('/team/invite', policies.isCoach, controller.sendInvite);
+
 app.get('/users', [policies.isAuthenticated, policies.isAdmin], function(req, res) {
     UsersDAO.getAll().then(function(users) {
         res.json(users);

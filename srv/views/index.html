@@ -17,6 +17,7 @@
     <div class="header">
         <h1>Hand Strategie</h1>
         <nav>
+            <li><a class="Users" href="/team">Team</a></li>
             <li><a class="Users" href="/_users">Users</a></li>
             <li><a class="compo" href="/_combis">Combinaisons</a></li>
         </nav>
@@ -83,6 +84,28 @@
     </ul>
 
     <canvas id="canvas-compo" height="550" width="1000"></canvas>
+</script>
+
+<script type="text/x-template" id="team-template">
+
+    <form action="/team" method="POST" id="team-invite">
+        <div>
+            <label for="team-name">Nom de l'équipe</label>
+            <input type="text" name="name" id="team-name" />
+        </div>
+
+        <h3>Membres</h3>
+        <ul class="invite-member-list">
+        inviter (saisisser les adresses mails des joueurs à inviter) :
+            <li>
+                <input type="text" name="mail"/> <a href="" class="remove-member">-</a>
+            </li>
+        </ul>
+        <a class="add-member" href="">+</a>
+
+        <input type="submit" value="Envoyer les inviatations" />
+    </form>
+
 </script>
 <!-- END TEMPLATES -->
 

@@ -20,7 +20,7 @@ module.exports = {
     },
     isCoach: function(req, res, next) {
         UsersDAO.find({login: req.user.login}).then(function(user) {
-            if (user[0].coach) {
+            if (user[0].coach || user[0].admin) {
                 next();
             } else {
                 // 403 forgiven

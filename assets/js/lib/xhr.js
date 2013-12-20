@@ -66,7 +66,7 @@ XHR.prototype = {
             this._xhr.setRequestHeader(header, this.header[header]);
         }
 
-        this._xhr.send(this.serialize(this.data));
+        this._xhr.send(this.data);
     },
 
     serialize: function(obj, prefix) {

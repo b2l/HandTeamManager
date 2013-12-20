@@ -45,5 +45,11 @@ module.exports = {
         }).fail(function(reason) {
             res.json(reason);
         });
+    },
+
+    sendInvite: function(req, res) {
+        console.log(req.body);
+        res.send('Sending invitation to ' + req.body.mails + ' for team ' + req.body.teamName );
+
     }
 };
