@@ -56,10 +56,36 @@ var controller = require('./controllers/app');
 var policies = require('./policies');
 
 /** ROUTES */
+
+/* Combinaisons API */
 app.get('/', policies.isAuthenticated, controller.index);
 app.get('/combis', policies.isAuthenticated, controller.allCombi);
 app.post('/combis', policies.isAuthenticated, controller.saveCombi);
 app.del('/combis/:id', policies.isAuthenticated, controller.deleteCombi);
+
+/* Équipe API */
+var teamRoutes = {
+    'GET /teams': 'Listes des équipes',
+
+    'GET /teams/:teamName': "Information sur l'équipe",
+    'PUT /teams/:teamName': "Mise à jour des données de l'équipe",
+    'DELETE /teams/:teamName': "Supprime l'équipe",
+
+    'GET /teams/:teamName/members': 'Listes des membres',
+    'POST /teams/:teamName/members': 'Ajout de membres',
+    'DELELE /teams/:teamName/members': 'Supprime un membre'
+};
+var userRoutes = {
+    /* As user */
+    'GET /users/me': "affiche le profile de l'utilisateur",
+    'PUT /users/me': "Mise à jour des données de l'utilisateur",
+
+    /* As admin */
+    'GET /users': 'Affice la liste des utilisateurs',
+    'POST /users': 'Ajoute un utilisateur',
+    'PUT /users/:id': 'Modifie un utilisateur',
+    'DELETE /users/:id': 'Supprime un utilisateur'
+};
 
 app.post('/team/invite', policies.isCoach, controller.sendInvite);
 
@@ -74,6 +100,8 @@ app.get('/users', [policies.isAuthenticated, policies.isAdmin], function(req, re
 app.post('/users', [policies.isAuthenticated, policies.isAdmin], function(req, res) {
     console.log(req.body);
 });
+
+app.get('/invite/:teamName', controller.createUserFromInvitation);
 
 app.get('/login', controller.showLoginForm);
 

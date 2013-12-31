@@ -47,9 +47,39 @@ module.exports = {
         });
     },
 
-    sendInvite: function(req, res) {
-        console.log(req.body);
-        res.send('Sending invitation to ' + req.body.mails + ' for team ' + req.body.teamName );
+    createUserFromInvitation: function(req, res) {
+        var teamName = req.params.teamName;
+    },
 
+    sendInvite: function(req, res) {
+        var body = req.body;
+        var teamName = body.teamName;
+        var mails = body.mails;
+        var link = 'http://localhost:3000/invite/' + teamName;
+        console.log('sending invitation mail to : ' + mails.join(', '));
+
+
+        var mailer = require('nodemailer');
+        var transport = mailer.createTransport('SMTP', {
+            host: 'smtp.free.fr',
+            port: 587,
+            secureConnection: false
+        });
+
+        transport.sendMail({
+            to: mails.join(', '),
+            from: 'noreply@ling.fr',
+            subject: "Hand Team Manager - Rejoignez votre équipe",
+            text: "Votre coach vous invite à rejoindre votre équipe sur Hand Team Manager, copier le lien suivant puis coller le dans la barre d'adresse de votre navigateur : " + link,
+            html: "<h2>Hand Team Manager</h2> <p>Votre coach vous invite à rejoindre votre équipe, cliquer sur le lien suivant : <a href='" + link + "'>" + link + "</a></p>"
+        }, function(error, response) {
+            if (error) {
+                console.log(error);
+                return;
+            }
+
+            console.log(response);
+        });
+        res.json({success: 'Invitations send with success'});
     }
 };
