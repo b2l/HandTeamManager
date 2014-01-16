@@ -18,8 +18,7 @@ Côtés server, on aura quasiment qu'une API Rest, qui gérera le stockage des d
 Fonctionnement avec [page](https://github.com/visionmedia/page.js).
 L'architecture est la suivante :
 
-<code>
-<pre>
+<pre><code>
 Router(page) 
     |
     v
@@ -27,8 +26,7 @@ Controller <--> Model
  |    ʌ
  v    |
   View   <--> DOM
-</pre>
-</code>
+</code></pre>
 
 Pour le début d'implémentation, il faut regarder uniquement les fichiers :
 - assets/app.js
