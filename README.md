@@ -22,10 +22,10 @@ L'architecture est la suivante :
 Router(page) 
     |
     v
-Controller <--> Model
+Controller < ---- > Model
  |    ʌ
  v    |
-  View   <--> DOM
+  View   < ------ > DOM
 </code></pre>
 
 Pour le début d'implémentation, il faut regarder uniquement les fichiers :
