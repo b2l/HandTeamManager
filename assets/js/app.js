@@ -1,54 +1,52 @@
 var page = require('page');
 
-var AppView= require('./views/app');
-var StrategieView = require('./views/strategie');
-var TeamView = require('./views/team');
-var UsersView = require('./views/users');
-var Users = require('./models/users');
 var XHR = require('./lib/xhr');
 
-var currentView = null;
+var applicationController = require('./controllers/application');
+var teamController = require('./controllers/team');
+var combisController = require('./controllers/combis');
 
-function clean(ctx, next) {
-    if (currentView) {
-        currentView.destroy.call(currentView);
-        next();
-    }
-}
+page('/',                                   getUser, getPage, applicationController.index);
 
-function transition(ctx, next) {
+page('/team/*', getUser, getPage);
+
+page('/team/create',                        teamController.create);
+page('/team/:team/edit',                    teamController.update);
+page('/team/:team/delete',                  teamController.del);
+page('/team/:team/addMembers',              teamController.addMembers);
+page('/team/:team/removeMembers',           teamController.removeMembers)
+
+page('/team/:team/combis',                  combisController.index);
+page('/team/:team/combis/create',           combisController.create);
+page('/team/:team/combis/:combis',          combisController.read);
+page('/team/:team/combis/:combis/edit',     combisController.update);
+page('/team/:team/combis/:combis/delete',   combisController.del);
+
+page('/team/:team',                         teamController.read);
+page('/team',                               teamController.index);
+
+function getPage(req, next) {
+    req.page = page;
     next();
 }
 
-function index(ctx) {
-    currentView = new AppView('#app-wrapper');
-    currentView.render();
-}
+function getUser(req, next) {
+    if (getUser.user) {
+        req.user = getUser.user;
+    }
+    if(undefined === req.user) {
+        new XHR().get('/user')
+            .success(function(data) {
+                getUser.user = req.user = JSON.parse(data);
+                next();
+            })
+            .error(function(data) {
+                next();
+            })
+            .send();
+    } else {
+        next();
+    }
+};
 
-function combis(ctx) {
-    var xhr = new XHR();
-    currentView = new StrategieView('#content');
-    xhr.get('/combis').success(function(data) {
-        if (data.length > 0)
-            currentView.setModel(JSON.parse(data));
-        else
-            currentView.setModel();
-    }).send();
-}
-
-function team(ctx) {
-    currentView = new TeamView('#content');
-    currentView.render();
-}
-
-function users(ctx) {
-    currentView = new UsersView('#content', Users.all());
-}
-
-page('/', index);
-page('/team', team);
-page('/_combis', combis);
-page('/_users', users);
-page('*', transition);
-page('*', clean);
 page();

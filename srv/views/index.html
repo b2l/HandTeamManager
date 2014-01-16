@@ -7,24 +7,61 @@
 </head>
 <body>
 
-<div id="app-wrapper"></div>
+<div class="header">
+    <h1>Hand Strategie</h1>
+    <nav>
+        <li><a class="Users" href="/team">Team</a></li>
+        <li><a class="Users" href="/_users">Users</a></li>
+        <li><a class="compo" href="/_combis">Combinaisons</a></li>
+    </nav>
+</div>
+
+<div id="content" class="content">
+</div>
 
 </body>
 
 <!-- START TEMPLATES -->
+<script type="text/x-template" id="login">
+    <div class="signin">
+        <h1>Sign in</h1>
 
-<script type="text/x-template" id="app-template">
-    <div class="header">
-        <h1>Hand Strategie</h1>
-        <nav>
-            <li><a class="Users" href="/team">Team</a></li>
-            <li><a class="Users" href="/_users">Users</a></li>
-            <li><a class="compo" href="/_combis">Combinaisons</a></li>
-        </nav>
-    </div>
+        <div class="google">
+            <a id="customBtn" href="/auth/google/">
+                <span class="icon"></span>
+                <span class="buttonText">Google</span>
+            </a>
+        </div>
 
-    <div id="content" class="content">
+        <div class="twitter">
+            <a id="twitter" href="/auth/twitter">Sign in with twitter</a>
+        </div>
     </div>
+</script>
+
+<script type="text/x-template" id="dashboard">
+    <div class="dashboard">
+        <h2>
+            Bienvenue <%= user.firstName %> <%= user.lastName %>
+        </h2>
+
+        <h3>Équipes</h3>
+        <a href="/team/create">Créer une équipe</a>
+        <ul>
+            <% _.each(teams, function(team) { %>
+            <li><%= team.name %></li>
+            <% }) %>
+        </ul>
+    </div>
+</script>
+
+<script type="text/x-template" id="create-team">
+    <form action="/team/create" method="GET" id="team-invite">
+        <div>
+            <label for="team-name">Nom de l'équipe</label>
+            <input type="text" name="name" id="team-name" />
+        </div>
+    </form>
 </script>
 
 <script type="text/x-template" id="users-template">

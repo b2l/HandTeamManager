@@ -58,7 +58,7 @@ var policies = require('./policies');
 /** ROUTES */
 
 /* Combinaisons API */
-app.get('/', policies.isAuthenticated, controller.index);
+app.get('/', controller.index);
 app.get('/combis', policies.isAuthenticated, controller.allCombi);
 app.post('/combis', policies.isAuthenticated, controller.saveCombi);
 app.del('/combis/:id', policies.isAuthenticated, controller.deleteCombi);
@@ -95,6 +95,12 @@ app.get('/users', [policies.isAuthenticated, policies.isAdmin], function(req, re
     }).fail(function(reason) {
         res.json(reason);
     });
+});
+app.get('/user', function(req, res) {
+    if (req.isAuthenticated())
+        res.json(req.user)
+    else
+        res.send(403);
 });
 
 app.post('/users', [policies.isAuthenticated, policies.isAdmin], function(req, res) {
@@ -148,3 +154,31 @@ function createOrGetUserFromTwitter(profile) {
 }
 
 app.listen(process.env.PORT || 3000);
+
+/* REST API */
+//var prefix = "/rest";
+//
+//// --- users
+//app.get(prefix+'/user', function(req,res) {});
+//app.get(prefix+'/users', function(req,res) {});
+//
+//// --- team
+//var teamPrefix = prefix+'/teams';
+//app.get(teamPrefix, function(req,res) {}); // list
+//app.post(teamPrefix, function(req,res) {}); // create
+//app.get(teamPrefix + '/:team', function(req, res) {})
+//app.put(teamPrefix + '/:team', function(req,res) {}); // update
+//app.del(teamPrefix + '/:team', function(req,res) {}); // delete
+//
+//// --- team members
+//app.get(teamPrefix + '/:team/members', function(req,res) {}); // list
+//app.post(teamPrefix + '/:team/members', function(req,res) {}); // create
+//app.del(teamPrefix + '/:team/members/:members', function(req,res) {}); // delete
+//
+//// --- combis
+//var combisPrefix = teamPrefix + '/:team/combis';
+//app.get(combisPrefix, function(req,res) {}); // list
+//app.post(combisPrefix, function(req,res) {}); // create
+//app.get(combisPrefix + '/:combis', function(req,res) {}); // read
+//app.put(combisPrefix + '/:combis', function(req,res) {}); // update
+//app.del(combisPrefix + '/:combis', function(req,res) {}); // delete

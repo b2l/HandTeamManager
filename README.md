@@ -1,55 +1,46 @@
-asserter
-========
+# ![BSC Logo](http://localhost:3000/public/img/header-s6680651eed.png) Hand Team Manager 
+ projet consiste à offrir une véritable solution clé en main au résponsable d'équipe de Handball.
+L'idée et de pouvoir facilement se connecter, inviter les membres de son équipe et partager ces combinaison (schéma de jeu) avec eux.
 
-expect(domSelector)
+## Objectif technique
 
-~~~
-	domSelector est un selecteur DOM. Comme l'assertion sera interprété dans le future, on ne peut pas lui passer une réference sur un noeud DOM
-~~~
+- Fonctionner en mode non connecté
+- Rafraichissement automatique sur le client si un autre utilisateur ajoute des données
+- Utilisation d'un stockage noSQL
+- Être indépendant du client, afin de pouvoir en faire un application pour mobile par exemple
 
-Vocabulaire :
--------------
+## Principe technique (développeur)
 
-- .to.be
+L'application est une Single Page App (ou Rich Internet Application).
+Côtés server, on aura quasiment qu'une API Rest, qui gérera le stockage des données.
 
-- .not.to.be
+### Client Web
+Fonctionnement avec [page](https://github.com/visionmedia/page.js).
+L'architecture est la suivante :
 
-- .to.have
+<pre>
+Router(page) 
+    |
+    v
+Controller <--> Model
+ |    ʌ
+ v    |
+  View   <--> DOM
+</pre>
 
-- .not.to.have
+Pour le début d'implémentation, il faut regarder uniquement les fichiers :
+- assets/app.js
+- assets/controllers/*.js
 
-- .be
+les templates sont fournits par le serveur dans la page HTML de base (srv/views/index.html)
 
-Test :
-------
+### Côtés Server
 
--   attr(attrName [, expectedAttrValue])
+Le server est écrit en nodejs, sans utiliser de Framework "full stack".
 
--   value(expectedValue)
+#### Rest API
 
--   text(expectedText) => check si le noeud contient le texte (n'importe où)
-
--   checked()
-
--   selected()
-
--   matchSelector(selector)
-
--   empty() => check si le noeud ne contient pas de text
-
--   exist()
-
--   hidden()
-
--   visible()
-
--   html(expectedHTML) => check si le noeud contient le code html en paramètre
-
--   true(fn) => appel la function, passe si elle renvoie true
-
--   false(fn) => appel la function, passe si elle renvoie false
-
-
-    les fonctions appelé par true et false recevront en paramètre
-
-
+GET /team
+GET /team/:team
+POST /team/:team
+...
