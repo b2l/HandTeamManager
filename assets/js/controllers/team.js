@@ -1,16 +1,21 @@
 /* TEAM CONTROLLER */
-var tpl = require('../lib/_template').tpl;
-
-var $wrapper = document.getElementById('content');
+var Team = require('../models/Team');
+var TeamView = require('../views/TeamView');
 module.exports = {
+    view: new TeamView(Team.all()),
+
     /* GET: List des équipes */
     index: function(req) {
-        console.log('team controller index!', req);
+        this.view.render();
     },
 
     /* POST: Ajout d'ume équipe */
     create: function(req) {
-        console.log('team controller create!', req);
+        var team = Team.create(JSON.parse(req.state.formData).name);
+        var that = this;
+        team.save().then(function() {
+            req.page('/team');
+        });
     },
 
     /* GET: détail d'une équipe */

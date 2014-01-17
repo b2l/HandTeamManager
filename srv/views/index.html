@@ -39,11 +39,8 @@
     </div>
 </script>
 
-<script type="text/x-template" id="dashboard">
+<script type="text/x-template" id="team-list-tpl">
     <div class="dashboard">
-        <h2>
-            Bienvenue <%= user.firstName %> <%= user.lastName %>
-        </h2>
 
         <h3>Équipes</h3>
         <a href="/team/create">Créer une équipe</a>
@@ -59,7 +56,7 @@
     <form action="/team/create" method="GET" id="team-invite">
         <div>
             <label for="team-name">Nom de l'équipe</label>
-            <input type="text" name="name" id="team-name" />
+            <input type="text" name="team-name" />
         </div>
     </form>
 </script>
